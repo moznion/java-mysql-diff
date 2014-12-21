@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
  *
  */
 public class TableParser {
-	public static void parse(String tableDefinition) {
+	public static Table parse(String tableDefinition) {
 		Matcher matcherForQuoteNames = Pattern.compile("`([^`]+)`").matcher(tableDefinition);
 		if (matcherForQuoteNames.find()) {
 			tableDefinition = matcherForQuoteNames.replaceAll(matcherForQuoteNames.group(1));
@@ -28,9 +28,15 @@ public class TableParser {
 			return line;
 		}).filter(line -> !line.isEmpty()).collect(Collectors.toList());
 
-		String firstLine = lines.remove(0);
+		String firstLine;
+		try {
+			firstLine = lines.remove(0);
+		} catch (IndexOutOfBoundsException e) {
+			throw new IllegalArgumentException("Table definition doesn't include a table name");
+		}
+
 		Matcher matcherForTableName =
-				Pattern.compile("^\\s*create\\s+table\\s+(\\S+)\\s+\\(\\s*$",
+				Pattern.compile("^create\\s+table\\s+(\\S+)\\s+\\($",
 						Pattern.CASE_INSENSITIVE)
 						.matcher(firstLine);
 		if (!matcherForTableName.find()) {
@@ -40,15 +46,17 @@ public class TableParser {
 		Table table = new Table();
 		table.setName(matcherForTableName.group(1));
 
+		// TODO support index_type
 		Pattern patternForPrimaryKey =
-				Pattern.compile("^primary\\s+key\\s+(.+)$", Pattern.CASE_INSENSITIVE);
+				Pattern.compile("^primary\\s+key\\s+\\((.+)\\)$", Pattern.CASE_INSENSITIVE);
+
 		Pattern patternForKey =
 				Pattern
 						.compile(
 								"^(key|index|unique(?:\\s+(?:key|index))?)\\s+(\\S+?)(?:\\s+using\\s+(?:btree|hash|rtree))?\\s*\\((.*)\\)$",
 								Pattern.CASE_INSENSITIVE);
 		Pattern patternForFullTextIndex =
-				Pattern.compile("^fulltext(?:\\s+(key|index))?\\s+(\\S+?)\\s*\\((.*)\\)$",
+				Pattern.compile("^fulltext(?:\\s+(?:key|index))?\\s+(\\S+?)\\s*\\((.*)\\)$",
 						Pattern.CASE_INSENSITIVE);
 		Pattern patternForEndOfTableDefinition = Pattern.compile("^\\)\\s*(.*?);$");
 		Pattern patternForFieldDefinition = Pattern.compile("^(\\S+)\\s*(.*)");
@@ -103,14 +111,24 @@ public class TableParser {
 			// For full-text index
 			Matcher matcherForFullTextIndex = patternForFullTextIndex.matcher(line);
 			if (matcherForFullTextIndex.find()) {
-				String key = matcherForKey.group(1);
-				String value = matcherForKey.group(2);
+				String key = matcherForFullTextIndex.group(1);
+				String value = matcherForFullTextIndex.group(2);
 
 				if (table.hasFullTextIndex(key)) {
 					throw new IllegalArgumentException(new StringBuilder()
 							.append("FULLTEXT index '")
-							.append(key).append("' duplicated in table '").append(table.getName())
+							.append(key).append("' duplicated in table '")
+							.append(table.getName())
 							.append("'")
+							.toString());
+				}
+
+				if (table.hasIndex(key)) {
+					throw new IllegalArgumentException(new StringBuilder()
+							.append("index '")
+							.append(key)
+							.append("' duplicated in table '")
+							.append(table.getName()).append("'")
 							.toString());
 				}
 
@@ -144,6 +162,7 @@ public class TableParser {
 				continue;
 			}
 
+			// Maybe unreachable
 			throw new IllegalArgumentException(new StringBuilder()
 					.append("Cannot parse line in definition for table '").append(table.getName())
 					.append("'").toString());
@@ -163,5 +182,7 @@ public class TableParser {
 					.append(table.getName()).append("' had trailing garbage:\n")
 					.append(String.join("\n", garbageLines)).toString());
 		}
+
+		return table;
 	}
 }
