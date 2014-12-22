@@ -36,7 +36,7 @@ public class TableParser {
 		}
 
 		Matcher matcherForTableName =
-				Pattern.compile("^create\\s+table\\s+(\\S+)\\s+\\($",
+				Pattern.compile("^create\\s+table\\s+(\\S+)\\s+(?:if not exists\\s+)?\\($",
 						Pattern.CASE_INSENSITIVE)
 						.matcher(firstLine);
 		if (!matcherForTableName.find()) {
