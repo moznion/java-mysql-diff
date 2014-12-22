@@ -46,9 +46,17 @@ public class TableParser {
 		Table table = new Table();
 		table.setName(matcherForTableName.group(1));
 
-		// TODO support index_type
+		Pattern patternForIndexType = Pattern.compile("using\\s+(?:btree|hash)", Pattern.CASE_INSENSITIVE);
+		Pattern patternForConstraintSymbol = Pattern.compile("constraint\\s+\\S+", Pattern.CASE_INSENSITIVE);
+
 		Pattern patternForPrimaryKey =
-				Pattern.compile("^primary\\s+key\\s+\\((.+)\\)$", Pattern.CASE_INSENSITIVE);
+				Pattern.compile(new StringBuilder()
+						.append("^(?:")
+						.append(patternForConstraintSymbol.pattern())
+						.append(")?primary\\s+key(?:\\s+")
+						.append(patternForIndexType.pattern())
+						.append(")?\\s+\\((.+)\\)$")
+						.toString(), Pattern.CASE_INSENSITIVE);
 
 		Pattern patternForKey =
 				Pattern
