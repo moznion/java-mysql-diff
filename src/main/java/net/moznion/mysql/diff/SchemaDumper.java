@@ -17,6 +17,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+import lombok.Setter;
 import lombok.experimental.Accessors;
 
 /**
@@ -32,6 +33,7 @@ public class SchemaDumper {
   private final String mysqlUser;
   private final String mysqlPass;
 
+  @Setter
   @Accessors(fluent = true)
   public static class Builder {
     private String mysqlHost = "localhost";
