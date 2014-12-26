@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import net.moznion.mysql.diff.model.Column;
@@ -127,15 +128,17 @@ public class Extractor {
     List<OrdinaryKey> oldKeys = oldTable.getKeys();
     List<OrdinaryKey> newKeys = newTable.getKeys();
 
-    Map<String, Boolean> oldKeysExistanceMap = oldKeys.stream()
-        .collect(Collectors.toMap(OrdinaryKey::getColumn, k -> true));
-    Map<String, Boolean> newKeysExistanceMap = newKeys.stream()
-        .collect(Collectors.toMap(OrdinaryKey::getColumn, k -> true));
+    Set<String> oldKeysAttendance = oldKeys.stream()
+        .map(OrdinaryKey::getColumn)
+        .collect(Collectors.toSet());
+    Set<String> newKeysAttendance = newKeys.stream()
+        .map(OrdinaryKey::getColumn)
+        .collect(Collectors.toSet());
 
     // add key
     for (OrdinaryKey key : newKeys) {
       String column = key.getColumn();
-      if (oldKeysExistanceMap.containsKey(column)) {
+      if (oldKeysAttendance.contains(column)) {
         continue;
       }
 
@@ -157,7 +160,7 @@ public class Extractor {
     // drop key
     for (OrdinaryKey key : oldKeys) {
       String column = key.getColumn();
-      if (newKeysExistanceMap.containsKey(column)) {
+      if (newKeysAttendance.contains(column)) {
         continue;
       }
 
@@ -178,15 +181,17 @@ public class Extractor {
     List<UniqueKey> oldKeys = oldTable.getUniqueKeys();
     List<UniqueKey> newKeys = newTable.getUniqueKeys();
 
-    Map<String, Boolean> oldKeysExistanceMap = oldKeys.stream()
-        .collect(Collectors.toMap(OrdinaryKey::getColumn, k -> true));
-    Map<String, Boolean> newKeysExistanceMap = newKeys.stream()
-        .collect(Collectors.toMap(OrdinaryKey::getColumn, k -> true));
+    Set<String> oldKeysAtendance = oldKeys.stream()
+        .map(OrdinaryKey::getColumn)
+        .collect(Collectors.toSet());
+    Set<String> newKeysAtendance = newKeys.stream()
+        .map(OrdinaryKey::getColumn)
+        .collect(Collectors.toSet());
 
     // add key
     for (UniqueKey key : newKeys) {
       String column = key.getColumn();
-      if (oldKeysExistanceMap.containsKey(column)) {
+      if (oldKeysAtendance.contains(column)) {
         continue;
       }
 
@@ -208,7 +213,7 @@ public class Extractor {
     // drop key
     for (OrdinaryKey key : oldKeys) {
       String column = key.getColumn();
-      if (newKeysExistanceMap.containsKey(column)) {
+      if (newKeysAtendance.contains(column)) {
         continue;
       }
 
