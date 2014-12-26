@@ -60,6 +60,42 @@ public class SchemaDumper {
         .toString();
   }
 
+  private String fetchSchemaViaMysqldump(String dbName)
+      throws IOException, InterruptedException, SQLException {
+    String schema;
+    List<String> mysqldumpCommand = Arrays.asList(
+        // "mysqldump",
+        "/usr/local/mysql/bin/mysqldump",
+        new StringBuilder().append("-u").append(mysqlUser).toString(),
+        "--no-data=true",
+        dbName);
+
+    ProcessBuilder processBuilder = new ProcessBuilder(mysqldumpCommand);
+
+    Process process = processBuilder.start();
+    try (InputStream inputStream = process.getInputStream()) {
+      StringBuilder stdoutStringBuilder = new StringBuilder();
+      try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
+        String line;
+        while ((line = bufferedReader.readLine()) != null) {
+          stdoutStringBuilder.append(line).append(LINE_SEPARATOR);
+        }
+      }
+      schema = stdoutStringBuilder.toString();
+    }
+
+    if (process.waitFor() != 0) {
+      throw new RuntimeException(
+          new StringBuilder()
+              .append("Failed to execute `mysqldump` command (command: ")
+              .append(String.join(" ", mysqldumpCommand))
+              .append(")")
+              .toString());
+    }
+
+    return schema;
+  }
+
   public String dump(String sql) throws SQLException, IOException, InterruptedException {
     String tempDBName = new StringBuilder()
         .append("tmp_")
@@ -71,43 +107,23 @@ public class SchemaDumper {
         stmt.executeUpdate("CREATE DATABASE " + tempDBName);
       }
 
-      List<String> mysqldumpCommand = Arrays.asList(
-          "mysqldump",
-          new StringBuilder().append("-u").append(mysqlUser).toString(),
-          "--no-data=true",
-          tempDBName);
-
-      ProcessBuilder processBuilder = new ProcessBuilder(mysqldumpCommand);
-
-      String schema;
-      Process process = processBuilder.start();
-      try (InputStream inputStream = process.getInputStream()) {
-        StringBuilder stdoutStringBuilder = new StringBuilder();
-        try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
-          String line;
-          while ((line = bufferedReader.readLine()) != null) {
-            stdoutStringBuilder.append(line).append(LINE_SEPARATOR);
-          }
+      try (Connection dbSpecifiedConnection = DriverManager.getConnection(
+          new StringBuilder().append(mysqlURL).append("/").append(tempDBName).toString(),
+          mysqlUser, mysqlPass)) {
+        try (Statement stmt = dbSpecifiedConnection.createStatement()) {
+          stmt.executeUpdate(sql);
         }
-        schema = stdoutStringBuilder.toString();
       }
 
-      int ret = process.waitFor();
-
-      try (Statement stmt = connection.createStatement()) {
-        stmt.executeUpdate("DROP DATABASE " + tempDBName);
+      return fetchSchemaViaMysqldump(tempDBName);
+    } catch (Exception e) {
+      throw e;
+    } finally {
+      try (Connection connection = DriverManager.getConnection(mysqlURL, mysqlUser, mysqlPass)) {
+        try (Statement stmt = connection.createStatement()) {
+          stmt.executeUpdate("DROP DATABASE " + tempDBName);
+        }
       }
-
-      if (ret != 0) {
-        throw new RuntimeException(
-            new StringBuilder()
-                .append("Failed to execute `mysqldump` command (command: ")
-                .append(String.join(" ", mysqldumpCommand))
-                .append(")")
-                .toString());
-      }
-
-      return schema;
     }
   }
 
@@ -120,5 +136,10 @@ public class SchemaDumper {
 
   public String dump(File sqlFile) throws IOException, SQLException, InterruptedException {
     return dump(sqlFile, StandardCharsets.UTF_8);
+  }
+
+  public String dumpFromLocalDB(String dbName) throws IOException, InterruptedException,
+      SQLException {
+    return fetchSchemaViaMysqldump(dbName);
   }
 }
