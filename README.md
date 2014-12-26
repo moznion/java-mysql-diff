@@ -13,7 +13,7 @@ TBD
 Description
 --
 
-This package is port of onishi-san's [mysqldiff](https://github.com/onishi/mysqldiff).
+This package is port of onishi-san's [mysqldiff](https://github.com/onishi/mysqldiff) from Perl to Java.
 
 See Also
 --
