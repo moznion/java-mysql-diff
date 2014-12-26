@@ -64,8 +64,7 @@ public class SchemaDumper {
       throws IOException, InterruptedException, SQLException {
     String schema;
     List<String> mysqldumpCommand = Arrays.asList(
-        // "mysqldump",
-        "/usr/local/mysql/bin/mysqldump",
+        "mysqldump",
         new StringBuilder().append("-u").append(mysqlUser).toString(),
         "--no-data=true",
         dbName);
