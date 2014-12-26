@@ -140,7 +140,7 @@ public class Extractor {
       }
 
       String name = String.join("_",
-          Arrays.asList(column.split(",")).stream()
+          Arrays.stream(column.split(","))
               .map(col -> col.replaceAll("[`()]", ""))
               .collect(Collectors.toList()));
 
