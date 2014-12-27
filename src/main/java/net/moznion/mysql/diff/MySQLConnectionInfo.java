@@ -9,7 +9,7 @@ public class MySQLConnectionInfo {
   private final String host;
   private final String user;
   private final String pass;
-  private final String uRL;
+  private final String jdbcURL;
 
   @Setter
   @Accessors(fluent = true)
@@ -33,7 +33,7 @@ public class MySQLConnectionInfo {
     host = builder.host;
     user = builder.user;
     pass = builder.pass;
-    uRL = new StringBuilder()
+    jdbcURL = new StringBuilder()
         .append("jdbc:mysql://")
         .append(builder.host)
         .toString();

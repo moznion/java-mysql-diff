@@ -13,6 +13,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -26,11 +27,11 @@ import java.util.UUID;
 public class SchemaDumper {
   private static final String LINE_SEPARATOR = System.lineSeparator();
 
-  private final MySQLConnectionInfo mysqlConnectionInfo;
+  private final MySQLConnectionInfo localMySQLConnectionInfo;
   private final String mysqldumpPath;
 
-  public SchemaDumper(MySQLConnectionInfo mysqlConnectionInfo, String mysqldumpPath) {
-    if (mysqlConnectionInfo == null) {
+  public SchemaDumper(MySQLConnectionInfo localMySQLConnectionInfo, String mysqldumpPath) {
+    if (localMySQLConnectionInfo == null) {
       throw new IllegalArgumentException("mysqlConnectionInfo must not be null");
     }
 
@@ -38,14 +39,14 @@ public class SchemaDumper {
       throw new IllegalArgumentException("mysqldumpPath must not be null");
     }
 
-    this.mysqlConnectionInfo = mysqlConnectionInfo;
+    this.localMySQLConnectionInfo = localMySQLConnectionInfo;
     this.mysqldumpPath = mysqldumpPath;
   }
 
-  public SchemaDumper(MySQLConnectionInfo mySQLConnectionInfo) {
-    this(mySQLConnectionInfo, "mysqldump");
+  public SchemaDumper(MySQLConnectionInfo localMySQLConnectionInfo) {
+    this(localMySQLConnectionInfo, "mysqldump");
   }
-  
+
   public SchemaDumper(String mysqldumpPath) {
     this(MySQLConnectionInfo.builder().build(), mysqldumpPath);
   }
@@ -54,14 +55,79 @@ public class SchemaDumper {
     this(MySQLConnectionInfo.builder().build());
   }
 
-  private String fetchSchemaViaMysqldump(String dbName)
+  public String dump(String sql) throws SQLException, IOException, InterruptedException {
+    String tempDBName = new StringBuilder()
+        .append("tmp_")
+        .append(UUID.randomUUID().toString().replaceAll("-", ""))
+        .toString();
+
+    String mysqlURL = localMySQLConnectionInfo.getJdbcURL();
+    String mysqlUser = localMySQLConnectionInfo.getUser();
+    String mysqlPass = localMySQLConnectionInfo.getPass();
+    try (Connection connection = DriverManager.getConnection(mysqlURL, mysqlUser, mysqlPass)) {
+      try (Statement stmt = connection.createStatement()) {
+        stmt.executeUpdate("CREATE DATABASE " + tempDBName);
+      }
+
+      try (Connection dbSpecifiedConnection = DriverManager.getConnection(
+          new StringBuilder().append(mysqlURL).append("/").append(tempDBName).toString(),
+          mysqlUser, mysqlPass)) {
+        try (Statement stmt = dbSpecifiedConnection.createStatement()) {
+          stmt.executeUpdate(sql);
+        }
+      }
+
+      return fetchSchemaViaMysqldump(tempDBName);
+    } catch (Exception e) {
+      throw e;
+    } finally {
+      try (Connection connection = DriverManager.getConnection(mysqlURL, mysqlUser, mysqlPass)) {
+        try (Statement stmt = connection.createStatement()) {
+          stmt.executeUpdate("DROP DATABASE " + tempDBName);
+        }
+      }
+    }
+  }
+
+  public String dump(File sqlFile, Charset charset)
+      throws IOException, SQLException, InterruptedException {
+    String sqlString =
+        new String(Files.readAllBytes(Paths.get(sqlFile.getAbsolutePath())), charset);
+    return dump(sqlString);
+  }
+
+  public String dump(File sqlFile) throws IOException, SQLException, InterruptedException {
+    return dump(sqlFile, StandardCharsets.UTF_8);
+  }
+
+  public String dumpFromLocalDB(String dbName)
       throws IOException, InterruptedException, SQLException {
+    return fetchSchemaViaMysqldump(dbName);
+  }
+
+  public String dumpFromRemoteDB(String dbName, MySQLConnectionInfo mysqlConnectionInfo)
+      throws IOException, InterruptedException, SQLException {
+    String schema = fetchSchemaViaMysqldump(dbName, mysqlConnectionInfo);
+    return dump(schema);
+  }
+
+  private String fetchSchemaViaMysqldump(String dbName, MySQLConnectionInfo mysqlConnectionInfo)
+      throws IOException, InterruptedException {
     String schema;
-    List<String> mysqldumpCommand = Arrays.asList(
+    List<String> mysqldumpCommand = new ArrayList<>(Arrays.asList(
         mysqldumpPath,
-        new StringBuilder().append("-u").append(mysqlConnectionInfo.getUser()).toString(),
         "--no-data=true",
-        dbName);
+        dbName));
+
+    String mysqlUser = mysqlConnectionInfo.getUser();
+    if (!mysqlUser.isEmpty()) {
+      mysqldumpCommand.add(new StringBuilder().append("-u").append(mysqlUser).toString());
+    }
+
+    String mysqlHost = mysqlConnectionInfo.getHost();
+    if (!mysqlHost.isEmpty()) {
+      mysqldumpCommand.add(new StringBuilder().append("-h").append(mysqlHost).toString());
+    }
 
     ProcessBuilder processBuilder = new ProcessBuilder(mysqldumpCommand);
 
@@ -89,53 +155,8 @@ public class SchemaDumper {
     return schema;
   }
 
-  public String dump(String sql) throws SQLException, IOException, InterruptedException {
-    String tempDBName = new StringBuilder()
-        .append("tmp_")
-        .append(UUID.randomUUID().toString().replaceAll("-", ""))
-        .toString();
-
-    String mysqlURL = mysqlConnectionInfo.getURL();
-    String mysqlUser = mysqlConnectionInfo.getUser();
-    String mysqlPass = mysqlConnectionInfo.getPass();
-    try (Connection connection = DriverManager.getConnection(mysqlURL, mysqlUser, mysqlPass)) {
-      try (Statement stmt = connection.createStatement()) {
-        stmt.executeUpdate("CREATE DATABASE " + tempDBName);
-      }
-
-      try (Connection dbSpecifiedConnection = DriverManager.getConnection(
-          new StringBuilder().append(mysqlURL).append("/").append(tempDBName).toString(),
-          mysqlUser, mysqlPass)) {
-        try (Statement stmt = dbSpecifiedConnection.createStatement()) {
-          stmt.executeUpdate(sql);
-        }
-      }
-
-      return fetchSchemaViaMysqldump(tempDBName);
-    } catch (Exception e) {
-      throw e;
-    } finally {
-      try (Connection connection = DriverManager.getConnection(mysqlURL, mysqlUser, mysqlPass)) {
-        try (Statement stmt = connection.createStatement()) {
-          stmt.executeUpdate("DROP DATABASE " + tempDBName);
-        }
-      }
-    }
-  }
-
-  public String dump(File sqlFile, Charset charset) throws IOException, SQLException,
-      InterruptedException {
-    String sqlString =
-        new String(Files.readAllBytes(Paths.get(sqlFile.getAbsolutePath())), charset);
-    return dump(sqlString);
-  }
-
-  public String dump(File sqlFile) throws IOException, SQLException, InterruptedException {
-    return dump(sqlFile, StandardCharsets.UTF_8);
-  }
-
-  public String dumpFromLocalDB(String dbName) throws IOException, InterruptedException,
-      SQLException {
-    return fetchSchemaViaMysqldump(dbName);
+  private String fetchSchemaViaMysqldump(String dbName)
+      throws IOException, InterruptedException, SQLException {
+    return fetchSchemaViaMysqldump(dbName, localMySQLConnectionInfo);
   }
 }
