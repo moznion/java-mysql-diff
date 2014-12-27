@@ -17,9 +17,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import lombok.Setter;
-import lombok.experimental.Accessors;
-
 /**
  * Parser for SQL table definition.
  * 
@@ -29,38 +26,32 @@ import lombok.experimental.Accessors;
 public class SchemaDumper {
   private static final String LINE_SEPARATOR = System.lineSeparator();
 
-  private final String mysqlURL;
-  private final String mysqlUser;
-  private final String mysqlPass;
+  private final MySQLConnectionInfo mysqlConnectionInfo;
   private final String mysqldumpPath;
 
-  @Setter
-  @Accessors(fluent = true)
-  public static class Builder {
-    private String mysqlHost = "localhost";
-    private String mysqlUser = "root";
-    private String mysqlPass = "";
-    private String mysqldumpPath = "mysqldump";
-
-    public Builder() {}
-
-    public SchemaDumper build() {
-      return new SchemaDumper(this);
+  public SchemaDumper(MySQLConnectionInfo mysqlConnectionInfo, String mysqldumpPath) {
+    if (mysqlConnectionInfo == null) {
+      throw new IllegalArgumentException("mysqlConnectionInfo must not be null");
     }
+
+    if (mysqldumpPath == null) {
+      throw new IllegalArgumentException("mysqldumpPath must not be null");
+    }
+
+    this.mysqlConnectionInfo = mysqlConnectionInfo;
+    this.mysqldumpPath = mysqldumpPath;
   }
 
-  public static Builder builder() {
-    return new Builder();
+  public SchemaDumper(MySQLConnectionInfo mySQLConnectionInfo) {
+    this(mySQLConnectionInfo, "mysqldump");
+  }
+  
+  public SchemaDumper(String mysqldumpPath) {
+    this(MySQLConnectionInfo.builder().build(), mysqldumpPath);
   }
 
-  private SchemaDumper(Builder builder) {
-    mysqlUser = builder.mysqlUser;
-    mysqlPass = builder.mysqlPass;
-    mysqlURL = new StringBuilder()
-        .append("jdbc:mysql://")
-        .append(builder.mysqlHost)
-        .toString();
-    mysqldumpPath = builder.mysqldumpPath;
+  public SchemaDumper() {
+    this(MySQLConnectionInfo.builder().build());
   }
 
   private String fetchSchemaViaMysqldump(String dbName)
@@ -68,7 +59,7 @@ public class SchemaDumper {
     String schema;
     List<String> mysqldumpCommand = Arrays.asList(
         mysqldumpPath,
-        new StringBuilder().append("-u").append(mysqlUser).toString(),
+        new StringBuilder().append("-u").append(mysqlConnectionInfo.getUser()).toString(),
         "--no-data=true",
         dbName);
 
@@ -104,6 +95,9 @@ public class SchemaDumper {
         .append(UUID.randomUUID().toString().replaceAll("-", ""))
         .toString();
 
+    String mysqlURL = mysqlConnectionInfo.getURL();
+    String mysqlUser = mysqlConnectionInfo.getUser();
+    String mysqlPass = mysqlConnectionInfo.getPass();
     try (Connection connection = DriverManager.getConnection(mysqlURL, mysqlUser, mysqlPass)) {
       try (Statement stmt = connection.createStatement()) {
         stmt.executeUpdate("CREATE DATABASE " + tempDBName);
