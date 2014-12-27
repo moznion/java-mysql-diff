@@ -32,6 +32,7 @@ public class SchemaDumper {
   private final String mysqlURL;
   private final String mysqlUser;
   private final String mysqlPass;
+  private final String mysqldumpPath;
 
   @Setter
   @Accessors(fluent = true)
@@ -39,6 +40,7 @@ public class SchemaDumper {
     private String mysqlHost = "localhost";
     private String mysqlUser = "root";
     private String mysqlPass = "";
+    private String mysqldumpPath = "mysqldump";
 
     public Builder() {}
 
@@ -58,13 +60,14 @@ public class SchemaDumper {
         .append("jdbc:mysql://")
         .append(builder.mysqlHost)
         .toString();
+    mysqldumpPath = builder.mysqldumpPath;
   }
 
   private String fetchSchemaViaMysqldump(String dbName)
       throws IOException, InterruptedException, SQLException {
     String schema;
     List<String> mysqldumpCommand = Arrays.asList(
-        "mysqldump",
+        mysqldumpPath,
         new StringBuilder().append("-u").append(mysqlUser).toString(),
         "--no-data=true",
         dbName);
