@@ -38,7 +38,7 @@ public class SchemaDumper {
   public static class Builder {
     private String mysqlHost = "localhost";
     private String mysqlUser = "root";
-    private String mysqqlPass = "";
+    private String mysqlPass = "";
 
     public Builder() {}
 
@@ -53,7 +53,7 @@ public class SchemaDumper {
 
   private SchemaDumper(Builder builder) {
     mysqlUser = builder.mysqlUser;
-    mysqlPass = builder.mysqqlPass;
+    mysqlPass = builder.mysqlPass;
     mysqlURL = new StringBuilder()
         .append("jdbc:mysql://")
         .append(builder.mysqlHost)
