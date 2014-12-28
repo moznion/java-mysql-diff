@@ -1,6 +1,8 @@
 package net.moznion.mysql.diff.model;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -31,17 +33,18 @@ public class Table {
       return new Table(this);
     }
   }
-  
+
   public static Builder builder() {
     return new Builder();
   }
 
   private Table(Builder builder) {
-    tableName = builder.tableName;
-    primaryKeys = builder.primaryKeys;
-    uniqueKeys = builder.uniqueKeys;
-    keys = builder.keys;
-    columns = builder.columns;
-    content = builder.content;
+    tableName = Optional.ofNullable(builder.tableName)
+        .orElseThrow(() -> new IllegalArgumentException("Missing table name"));
+    primaryKeys = Optional.ofNullable(builder.primaryKeys).orElse(new ArrayList<>());
+    uniqueKeys = Optional.ofNullable(builder.uniqueKeys).orElse(new ArrayList<>());
+    keys = Optional.ofNullable(builder.keys).orElse(new ArrayList<>());
+    columns = Optional.ofNullable(builder.columns).orElse(new ArrayList<>());
+    content = Optional.ofNullable(builder.content).orElse("");
   }
 }
