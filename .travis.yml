@@ -1,6 +1,6 @@
 language: java
 jdk:
-- oraclejdk8
+  - oraclejdk8
 install: mvn install -DskipTests=true -Dgpg.skip=true
 after_success:
   - echo -e "Host github.com\n\tStrictHostKeyChecking no\nIdentityFile ~/.ssh/deploy.key\n" >> ~/.ssh/config
@@ -9,15 +9,16 @@ after_success:
   - chmod 600 ~/.ssh/deploy.key
   - git config --global user.name  "moznion"
   - git config --global user.email "moznion@gmail.com"
+before_deploy:
+    - mvn -P fatjar clean package -DskipTests=true -Dproject.finalName=$TRAVIS_TAG
 deploy:
-    provider: releases
-    api_key:
-        secure: xc+bbPub876ILAIDguZBlX+TrFrScMKB2q1LPVuarCX0LYiczxbkwwbM8ArGfXEcDny651pok+/+D4j9DedPXHLPuRdi04Ah8mftsfv4HtvBxCfnyfmteae4eNKFCOqTtd5Ez920FwmDsOwMTANmHGp2U6PiwHMx+loy+uutfxA=
-        file:
-            - "target/mysql-diff.jar"
-        skip_cleanup: true
-        on:
-            repo: moznion/java-mysql-diff
-            all_branches: true
-            tags: true
+  provider: releases
+  api_key:
+    secure: tBjY19aiHZ02GsCj9W+B0iscsZM8X+geHuErZdQ82wrhsf9DwxwBqPDYlfVtf19VhbnfZy/JjqMqv+R8T6lIYZxsgvbTaT41IA7dR9g49W6LfPZStY4blYF8cR+WB7tlS7bJ+9KhIzZ/5+DxAqZ78PfDENhMseWMNR39g/d3Dmw=
+  file: target/mysql-diff.jar
+  skip_cleanup: true
+  on:
+    repo: moznion/java-mysql-diff
+    all_branches: true
+    tags: true
 

@@ -14,7 +14,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		<project.jarName>${project.artifactId}-${project.version}</project.jarName>
+		<project.finalName>${project.artifactId}-${project.version}</project.finalName>
 	</properties>
 
 	<dependencies>
@@ -67,7 +67,7 @@
 							<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
 						</manifest>
 					</archive>
-					<finalName>${project.jarName}</finalName>
+					<finalName>${project.finalName}</finalName>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -159,7 +159,7 @@
 				</plugins>
 			</build>
 			<properties>
-				<project.jarName>${project.artifactId}</project.jarName>
+				<project.finalName>${project.artifactId}</project.finalName>
 			</properties>
 		</profile>
 	</profiles>
