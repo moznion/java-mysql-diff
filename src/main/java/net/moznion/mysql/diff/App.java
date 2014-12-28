@@ -14,6 +14,11 @@ import net.moznion.mysql.diff.model.Table;
 public class App {
   public static void main(String[] args) throws IOException, SQLException, InterruptedException {
     // TODO use log4j
+    if (args.length <= 0) {
+      // TODO show usage
+      throw new IllegalArgumentException("Too few command line arguments");
+    }
+
     if (args[0].equals("-version")) {
       System.out.println(App.class.getPackage().getImplementationVersion());
       return;

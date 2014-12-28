@@ -15,7 +15,7 @@ deploy:
   provider: releases
   api_key:
     secure: tBjY19aiHZ02GsCj9W+B0iscsZM8X+geHuErZdQ82wrhsf9DwxwBqPDYlfVtf19VhbnfZy/JjqMqv+R8T6lIYZxsgvbTaT41IA7dR9g49W6LfPZStY4blYF8cR+WB7tlS7bJ+9KhIzZ/5+DxAqZ78PfDENhMseWMNR39g/d3Dmw=
-  file: target/mysql-diff.jar
+  file: target/$TRAVIS_TAG.jar
   skip_cleanup: true
   on:
     repo: moznion/java-mysql-diff
