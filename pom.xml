@@ -14,7 +14,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		<project.jarSuffix></project.jarSuffix>
+		<project.jarName>${project.artifactId}-${project.version}</project.jarName>
 	</properties>
 
 	<dependencies>
@@ -67,7 +67,7 @@
 							<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
 						</manifest>
 					</archive>
-					<finalName>${project.artifactId}-${project.version}${project.jarSuffix}</finalName>
+					<finalName>${project.jarName}</finalName>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -159,7 +159,7 @@
 				</plugins>
 			</build>
 			<properties>
-				<project.jarSuffix>-App</project.jarSuffix>
+				<project.jarName>${project.artifactId}</project.jarName>
 			</properties>
 		</profile>
 	</profiles>
