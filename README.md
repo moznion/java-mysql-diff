@@ -25,6 +25,8 @@ please run following command;
 $ mvn -P fatjar clean package
 ```
 
+And now, generated runnable fat-jar file has been available on [GitHub Releases](https://github.com/moznion/java-mysql-diff/releases).
+
 See Also
 --
 
