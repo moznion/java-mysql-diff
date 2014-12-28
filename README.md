@@ -15,6 +15,16 @@ Description
 
 This package is port of onishi-san's [mysqldiff](https://github.com/onishi/mysqldiff) from Perl to Java.
 
+How to build fat-jar
+--
+
+If you want to build an executable standalone jar,
+please run following command;
+
+```
+$ mvn -P fatjar clean package
+```
+
 See Also
 --
 
