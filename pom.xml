@@ -12,6 +12,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.jarSuffix></project.jarSuffix>
 	</properties>
 
 	<dependencies>
@@ -57,6 +58,7 @@
 							<mainClass>net.moznion.mysql.diff.App</mainClass>
 						</manifest>
 					</archive>
+					<finalName>${project.artifactId}-${project.version}${project.jarSuffix}</finalName>
 				</configuration>
 			</plugin>
 		</plugins>
@@ -80,10 +82,14 @@
 							<descriptorRefs>
 								<descriptorRef>jar-with-dependencies</descriptorRef>
 							</descriptorRefs>
+							<appendAssemblyId>false</appendAssemblyId>
 						</configuration>
 					</plugin>
 				</plugins>
 			</build>
+			<properties>
+				<project.jarSuffix>-App</project.jarSuffix>
+			</properties>
 		</profile>
 	</profiles>
 </project>
