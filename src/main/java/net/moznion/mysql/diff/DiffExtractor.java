@@ -14,7 +14,7 @@ import net.moznion.mysql.diff.model.OrdinaryKey;
 import net.moznion.mysql.diff.model.Table;
 import net.moznion.mysql.diff.model.UniqueKey;
 
-public class Extractor {
+public class DiffExtractor {
   public static String extractDiff(List<Table> oldTables, List<Table> newTables) {
     StringBuilder diffStringBuilder = new StringBuilder();
 
