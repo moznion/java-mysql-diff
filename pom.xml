@@ -24,6 +24,11 @@
 			<version>5.1.34</version>
 		</dependency>
 		<dependency>
+			<groupId>args4j</groupId>
+			<artifactId>args4j</artifactId>
+			<version>2.0.29</version>
+		</dependency>
+		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.11</version>
@@ -58,6 +63,8 @@
 					<archive>
 						<manifest>
 							<mainClass>net.moznion.mysql.diff.App</mainClass>
+							<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+							<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
 						</manifest>
 					</archive>
 					<finalName>${project.artifactId}-${project.version}${project.jarSuffix}</finalName>
@@ -143,11 +150,6 @@
 						<artifactId>maven-assembly-plugin</artifactId>
 						<version>2.5.3</version>
 						<configuration>
-							<archive>
-								<manifest>
-									<mainClass>net.moznion.mysql.diff.App</mainClass>
-								</manifest>
-							</archive>
 							<descriptorRefs>
 								<descriptorRef>jar-with-dependencies</descriptorRef>
 							</descriptorRefs>
