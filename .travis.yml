@@ -2,13 +2,6 @@ language: java
 jdk:
   - oraclejdk8
 install: mvn install -DskipTests=true -Dgpg.skip=true
-after_success:
-  - echo -e "Host github.com\n\tStrictHostKeyChecking no\nIdentityFile ~/.ssh/deploy.key\n" >> ~/.ssh/config
-  - openssl aes-256-cbc -k "$SERVER_KEY" -in etc/deploy_key.enc -d -a -out deploy.key
-  - cp deploy.key ~/.ssh/
-  - chmod 600 ~/.ssh/deploy.key
-  - git config --global user.name  "moznion"
-  - git config --global user.email "moznion@gmail.com"
 before_deploy:
     - mvn -P fatjar clean package -DskipTests=true -Dproject.finalName=$TRAVIS_TAG
 deploy:
