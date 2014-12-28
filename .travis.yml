@@ -1,5 +1,23 @@
 language: java
 jdk:
-  - oraclejdk8
+- oraclejdk8
 install: mvn install -DskipTests=true -Dgpg.skip=true
+after_success:
+  - echo -e "Host github.com\n\tStrictHostKeyChecking no\nIdentityFile ~/.ssh/deploy.key\n" >> ~/.ssh/config
+  - openssl aes-256-cbc -k "$SERVER_KEY" -in etc/deploy_key.enc -d -a -out deploy.key
+  - cp deploy.key ~/.ssh/
+  - chmod 600 ~/.ssh/deploy.key
+  - git config --global user.name  "moznion"
+  - git config --global user.email "moznion@gmail.com"
+deploy:
+    provider: releases
+    api_key:
+        secure: xc+bbPub876ILAIDguZBlX+TrFrScMKB2q1LPVuarCX0LYiczxbkwwbM8ArGfXEcDny651pok+/+D4j9DedPXHLPuRdi04Ah8mftsfv4HtvBxCfnyfmteae4eNKFCOqTtd5Ez920FwmDsOwMTANmHGp2U6PiwHMx+loy+uutfxA=
+        file:
+            - "target/mysql-diff.jar"
+        skip_cleanup: true
+        on:
+            repo: moznion/java-mysql-diff
+            all_branches: true
+            tags: true
 
