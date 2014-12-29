@@ -20,6 +20,27 @@ import org.junit.runner.RunWith;
 @RunWith(Enclosed.class)
 public class DiffExtractorTest {
   public static class forTableDiff {
+    private static final SchemaDumper SCHEMA_DUMPER = new SchemaDumper();
+
+    private String getAlterTableDiffRightly(String oldSQL, String newSQL) throws SQLException,
+        IOException, InterruptedException {
+      String oldSchema = SCHEMA_DUMPER.dump(oldSQL);
+      String newSchema = SCHEMA_DUMPER.dump(newSQL);
+
+      List<Table> oldTables = SchemaParser.parse(oldSchema);
+      List<Table> newTables = SchemaParser.parse(newSchema);
+
+      String diff = DiffExtractor.extractDiff(oldTables, newTables);
+      diff = diff.replaceAll("\r?\n", "");
+
+      assertTrue(diff.startsWith("ALTER TABLE `sample` "));
+      assertTrue(diff.endsWith(";"));
+      diff = diff.replaceFirst("^ALTER TABLE `sample` ", "");
+      diff = diff.replaceFirst(";$", "");
+
+      return diff;
+    }
+
     @Test
     public void shouldDetectColumnDiffRightly() throws SQLException, IOException,
         InterruptedException {
@@ -36,21 +57,7 @@ public class DiffExtractorTest {
           "  PRIMARY KEY (`id`)" +
           ") ENGINE=InnoDB DEFAULT CHARSET=utf8;";
 
-      SchemaDumper sd = new SchemaDumper();
-      String oldSchema = sd.dump(oldSQL);
-      String newSchema = sd.dump(newSQL);
-
-      List<Table> oldTables = SchemaParser.parse(oldSchema);
-      List<Table> newTables = SchemaParser.parse(newSchema);
-
-      String diff = DiffExtractor.extractDiff(oldTables, newTables);
-      diff = diff.replaceAll("\r?\n", "");
-
-      assertTrue(diff.startsWith("ALTER TABLE `sample` "));
-      assertTrue(diff.endsWith(";"));
-      diff = diff.replaceFirst("^ALTER TABLE `sample` ", "");
-      diff = diff.replaceFirst(";$", "");
-
+      String diff = getAlterTableDiffRightly(oldSQL, newSQL);
       Set<String> modifiers = Arrays.stream(diff.split(", ")).collect(Collectors.toSet());
       Set<String> expected = Stream.of(
           "DROP `created_on`",
@@ -85,21 +92,7 @@ public class DiffExtractorTest {
           "  KEY `timestamp` (`created_on`,`updated_on`)" +
           ") ENGINE=InnoDB DEFAULT CHARSET=utf8;";
 
-      SchemaDumper sd = new SchemaDumper();
-      String oldSchema = sd.dump(oldSQL);
-      String newSchema = sd.dump(newSQL);
-
-      List<Table> oldTables = SchemaParser.parse(oldSchema);
-      List<Table> newTables = SchemaParser.parse(newSchema);
-
-      String diff = DiffExtractor.extractDiff(oldTables, newTables);
-      diff = diff.replaceAll("\r?\n", "");
-
-      assertTrue(diff.startsWith("ALTER TABLE `sample` "));
-      assertTrue(diff.endsWith(";"));
-      diff = diff.replaceFirst("^ALTER TABLE `sample` ", "");
-      diff = diff.replaceFirst(";$", "");
-
+      String diff = getAlterTableDiffRightly(oldSQL, newSQL);
       Set<String> modifiers = Arrays.stream(diff.split(", ")).collect(Collectors.toSet());
       Set<String> expected = Stream.of(
           "ADD INDEX `created_on_updated_on` (`created_on`,`updated_on`)",
