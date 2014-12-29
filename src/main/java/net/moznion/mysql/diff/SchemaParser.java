@@ -83,6 +83,7 @@ public class SchemaParser {
           .tableName(tableName)
           .primaryKeys(primaryKeys)
           .keys(keys)
+          .uniqueKeys(uniqueKeys)
           .columns(columns)
           .content(content)
           .build());
