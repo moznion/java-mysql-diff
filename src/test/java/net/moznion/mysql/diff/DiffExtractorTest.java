@@ -19,9 +19,9 @@ import org.junit.runner.RunWith;
 
 @RunWith(Enclosed.class)
 public class DiffExtractorTest {
-  public static class forTableDiff {
-    private static final SchemaDumper SCHEMA_DUMPER = new SchemaDumper();
+  private static final SchemaDumper SCHEMA_DUMPER = new SchemaDumper();
 
+  public static class forTableDiff {
     private String getAlterTableDiffRightly(String oldSQL, String newSQL) throws SQLException,
         IOException, InterruptedException {
       String oldSchema = SCHEMA_DUMPER.dump(oldSQL);
@@ -101,6 +101,39 @@ public class DiffExtractorTest {
           "DROP INDEX `name`"
           ).collect(Collectors.toSet());
       assertEquals(modifiers, expected);
+    }
+  }
+
+  public static class forMissingTable {
+    @Test
+    public void shouldDetectMissingTableRightly() throws SQLException, IOException,
+        InterruptedException {
+      String oldSQL = "CREATE TABLE `sample` (" +
+          "  `id` int(10) NOT NULL AUTO_INCREMENT," +
+          "  PRIMARY KEY (`id`)" +
+          ") ENGINE=InnoDB DEFAULT CHARSET=utf8;";
+      String newSQL = "CREATE TABLE `new_one` (" +
+          "  `id` int(10) NOT NULL AUTO_INCREMENT," +
+          "  PRIMARY KEY (`id`)" +
+          ") ENGINE=InnoDB DEFAULT CHARSET=utf8;";
+
+      String oldSchema = SCHEMA_DUMPER.dump(oldSQL);
+      String newSchema = SCHEMA_DUMPER.dump(newSQL);
+
+      List<Table> oldTables = SchemaParser.parse(oldSchema);
+      List<Table> newTables = SchemaParser.parse(newSchema);
+
+      String diff = DiffExtractor.extractDiff(oldTables, newTables);
+      List<String> got = Arrays.stream(diff.split("\r?\n"))
+          .map(line -> line.trim())
+          .collect(Collectors.toList());
+      List<String> expected = Arrays.asList(
+          "CREATE TABLE `new_one` (",
+          "`id` int(10) NOT NULL AUTO_INCREMENT,",
+          "PRIMARY KEY (`id`)",
+          ") ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+
+      assertEquals(got, expected);
     }
   }
 }
