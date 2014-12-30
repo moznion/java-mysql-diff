@@ -65,7 +65,7 @@ public class AppTest {
         "    java -jar dbname1 dbname2\n" +
         "* Take diff between dbname1 and dbname2 " +
         "(both of databases on remote MySQL)\n" +
-        "    java -jar '-uroot -hlocalhost dbname1' '-uroot -hlocalhost dbname2'" +
+        "    java -jar '-u root -h localhost dbname1' '-u root -h localhost dbname2'" +
         "\n" +
         "[Options]\n" +
         "    -h, --help:    Show usage\n" +
