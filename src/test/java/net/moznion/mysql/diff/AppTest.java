@@ -2,6 +2,7 @@ package net.moznion.mysql.diff;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
 
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
@@ -20,6 +21,8 @@ import java.util.Arrays;
 import java.util.UUID;
 
 import org.junit.Test;
+
+import com.mysql.jdbc.exceptions.jdbc4.CommunicationsException;
 
 public class AppTest {
   private static final String SQL_FOR_TEST = "CREATE TABLE `sample` (\n" +
@@ -109,7 +112,11 @@ public class AppTest {
     }
 
     String args[] = {sqlFile1.getAbsolutePath(), sqlFile2.getAbsolutePath()};
-    App.main(args);
+    try {
+      App.main(args);
+    } catch (CommunicationsException e) {
+      assumeTrue("MySQL maybe not launched", false);
+    }
 
     assertTrue(true);
 
@@ -148,6 +155,9 @@ public class AppTest {
 
       String args[] = {tempDBName1, tempDBName2};
       App.main(args);
+    } catch (CommunicationsException e) {
+      assumeTrue("MySQL maybe not launched", false);
+      return;
     } catch (Exception e) {
       assertTrue(false);
       throw e;
@@ -158,6 +168,8 @@ public class AppTest {
             stmt.executeUpdate("DROP DATABASE " + dbName);
           }
         }
+      } catch (CommunicationsException e) {
+        assumeTrue("MySQL maybe not launched", false);
       }
     }
 
@@ -199,6 +211,9 @@ public class AppTest {
           "'-u root -h localhost " + tempDBName2 + "'"
       };
       App.main(args);
+    } catch (CommunicationsException e) {
+      assumeTrue("MySQL maybe not launched", false);
+      return;
     } catch (Exception e) {
       throw e;
     } finally {
@@ -208,6 +223,8 @@ public class AppTest {
             stmt.executeUpdate("DROP DATABASE " + dbName);
           }
         }
+      } catch (CommunicationsException e) {
+        assumeTrue("MySQL maybe not launched", false);
       }
     }
 

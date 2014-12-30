@@ -2,6 +2,7 @@ package net.moznion.mysql.diff;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -16,6 +17,8 @@ import net.moznion.mysql.diff.model.Table;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
+
+import com.mysql.jdbc.exceptions.jdbc4.CommunicationsException;
 
 @RunWith(Enclosed.class)
 public class DiffExtractorTest {
@@ -57,14 +60,20 @@ public class DiffExtractorTest {
           "  PRIMARY KEY (`id`)" +
           ") ENGINE=InnoDB DEFAULT CHARSET=utf8;";
 
-      String diff = getAlterTableDiffRightly(oldSQL, newSQL);
-      Set<String> modifiers = Arrays.stream(diff.split(", ")).collect(Collectors.toSet());
-      Set<String> expected = Stream.of(
-          "DROP `created_on`",
-          "MODIFY `title` varchar(64) DEFAULT NULL",
-          "ADD `updated_on` int(10) unsigned NOT NULL"
-          ).collect(Collectors.toSet());
-      assertEquals(modifiers, expected);
+      try {
+        String diff = getAlterTableDiffRightly(oldSQL, newSQL);
+        Set<String> modifiers = Arrays.stream(diff.split(", ")).collect(Collectors.toSet());
+        Set<String> expected = Stream.of(
+            "DROP `created_on`",
+            "MODIFY `title` varchar(64) DEFAULT NULL",
+            "ADD `updated_on` int(10) unsigned NOT NULL"
+            ).collect(Collectors.toSet());
+        assertEquals(modifiers, expected);
+      } catch (CommunicationsException e) {
+        assumeTrue("MySQL maybe not launched", false);
+      } catch (Exception e) {
+        assertTrue(false);
+      }
     }
 
     @Test
@@ -92,15 +101,21 @@ public class DiffExtractorTest {
           "  KEY `timestamp` (`created_on`,`updated_on`)" +
           ") ENGINE=InnoDB DEFAULT CHARSET=utf8;";
 
-      String diff = getAlterTableDiffRightly(oldSQL, newSQL);
-      Set<String> modifiers = Arrays.stream(diff.split(", ")).collect(Collectors.toSet());
-      Set<String> expected = Stream.of(
-          "ADD INDEX `created_on_updated_on` (`created_on`,`updated_on`)",
-          "DROP INDEX `updated_on`",
-          "ADD UNIQUE INDEX `email_name` (`email`,`name`)",
-          "DROP INDEX `name`"
-          ).collect(Collectors.toSet());
-      assertEquals(modifiers, expected);
+      try {
+        String diff = getAlterTableDiffRightly(oldSQL, newSQL);
+        Set<String> modifiers = Arrays.stream(diff.split(", ")).collect(Collectors.toSet());
+        Set<String> expected = Stream.of(
+            "ADD INDEX `created_on_updated_on` (`created_on`,`updated_on`)",
+            "DROP INDEX `updated_on`",
+            "ADD UNIQUE INDEX `email_name` (`email`,`name`)",
+            "DROP INDEX `name`"
+            ).collect(Collectors.toSet());
+        assertEquals(modifiers, expected);
+      } catch (CommunicationsException e) {
+        assumeTrue("MySQL maybe not launched", false);
+      } catch (Exception e) {
+        assertTrue(false);
+      }
     }
   }
 
@@ -117,23 +132,28 @@ public class DiffExtractorTest {
           "  PRIMARY KEY (`id`)" +
           ") ENGINE=InnoDB DEFAULT CHARSET=utf8;";
 
-      String oldSchema = SCHEMA_DUMPER.dump(oldSQL);
-      String newSchema = SCHEMA_DUMPER.dump(newSQL);
+      try {
+        String oldSchema = SCHEMA_DUMPER.dump(oldSQL);
+        String newSchema = SCHEMA_DUMPER.dump(newSQL);
 
-      List<Table> oldTables = SchemaParser.parse(oldSchema);
-      List<Table> newTables = SchemaParser.parse(newSchema);
+        List<Table> oldTables = SchemaParser.parse(oldSchema);
+        List<Table> newTables = SchemaParser.parse(newSchema);
 
-      String diff = DiffExtractor.extractDiff(oldTables, newTables);
-      List<String> got = Arrays.stream(diff.split("\r?\n"))
-          .map(line -> line.trim())
-          .collect(Collectors.toList());
-      List<String> expected = Arrays.asList(
-          "CREATE TABLE `new_one` (",
-          "`id` int(10) NOT NULL AUTO_INCREMENT,",
-          "PRIMARY KEY (`id`)",
-          ") ENGINE=InnoDB DEFAULT CHARSET=utf8;");
-
-      assertEquals(got, expected);
+        String diff = DiffExtractor.extractDiff(oldTables, newTables);
+        List<String> got = Arrays.stream(diff.split("\r?\n"))
+            .map(line -> line.trim())
+            .collect(Collectors.toList());
+        List<String> expected = Arrays.asList(
+            "CREATE TABLE `new_one` (",
+            "`id` int(10) NOT NULL AUTO_INCREMENT,",
+            "PRIMARY KEY (`id`)",
+            ") ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+        assertEquals(got, expected);
+      } catch (CommunicationsException e) {
+        assumeTrue("MySQL maybe not launched", false);
+      } catch (Exception e) {
+        assertTrue(false);
+      }
     }
   }
 }
