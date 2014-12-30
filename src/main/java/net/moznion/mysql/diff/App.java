@@ -7,9 +7,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
+import lombok.Getter;
 import net.moznion.mysql.diff.model.Table;
 
 import org.kohsuke.args4j.Argument;
@@ -27,6 +26,21 @@ public class App {
 
   @Argument(index = 0, metaVar = "arguments...", handler = StringArrayOptionHandler.class)
   private String[] arguments;
+
+  @Getter
+  private class RemoteDBArg {
+    @Option(name = "-h", aliases = "--host", metaVar = "host", usage = "specify host")
+    private String host;
+
+    @Option(name = "-u", aliases = "--user", metaVar = "user", usage = "specify user")
+    private String user;
+
+    @Option(name = "-p", aliases = "--password", metaVar = "pass", usage = "specify password")
+    private String pass;
+
+    @Argument(index = 0, metaVar = "dbName")
+    private String dbName;
+  }
 
   public static void main(String[] args) throws IOException, SQLException, InterruptedException {
     App app = new App();
@@ -74,8 +88,34 @@ public class App {
         schema = schemaDumper.dump(file);
       } else if (arg.contains(" ")) {
         // for remote server
+        RemoteDBArg remoteDBArg = new App().new RemoteDBArg();
+        CmdLineParser remoteDBArgParser = new CmdLineParser(remoteDBArg);
+        try {
+          remoteDBArgParser.parseArgument(arg.substring(1, arg.length() - 1).split(" "));
+        } catch (CmdLineException e) {
+          throw new IllegalArgumentException("Invalid remote DB argument is detected: " + arg);
+        }
+
+        if (remoteDBArg.dbName == null || remoteDBArg.dbName.isEmpty()) {
+          throw new IllegalArgumentException("Invalid remote DB argument is detected: " + arg);
+        }
+
+        MySQLConnectionInfo.Builder mysqlConnectionInfoBuilder = MySQLConnectionInfo.builder();
+
+        if (remoteDBArg.host != null) {
+          mysqlConnectionInfoBuilder.host(remoteDBArg.host);
+        }
+
+        if (remoteDBArg.user != null) {
+          mysqlConnectionInfoBuilder.user(remoteDBArg.user);
+        }
+
+        if (remoteDBArg.pass != null) {
+          mysqlConnectionInfoBuilder.pass(remoteDBArg.pass);
+        }
+
         schema =
-            schemaDumper.dumpFromRemoteDB(parseArgForDBName(arg), parseArgForConnectionInfo(arg));
+            schemaDumper.dumpFromRemoteDB(remoteDBArg.dbName, mysqlConnectionInfoBuilder.build());
       } else {
         // for local server
         schema = schemaDumper.dumpFromLocalDB(arg);
@@ -86,59 +126,6 @@ public class App {
 
     String diff = DiffExtractor.extractDiff(parsed.get(0), parsed.get(1));
     System.out.println(diff);
-  }
-
-  private static final Pattern patternForHost = Pattern.compile("^-h(.+)$");
-  private static final Pattern patternForUser = Pattern.compile("^-u(.+)$");
-  private static final Pattern patternForPass = Pattern.compile("^-p(.+)$");
-
-  private static String parseArgForDBName(String info) {
-    info = info.substring(1, info.length() - 1); // remove quotes
-    List<String> flags = Arrays.asList(info.split(" "));
-
-    String dbName = null;
-    for (String flag : flags) {
-      Matcher matcherForHost = patternForHost.matcher(flag);
-      Matcher matcherForUser = patternForUser.matcher(flag);
-      Matcher matcherForPass = patternForPass.matcher(flag);
-
-      if (!matcherForHost.matches() &&
-          !matcherForUser.matches() &&
-          !matcherForPass.matches()) {
-        dbName = flag;
-      }
-    }
-
-    if (dbName == null) {
-      throw new IllegalArgumentException("Argument for remote connection must contain DB name");
-    }
-
-    return dbName;
-  }
-
-  private static MySQLConnectionInfo parseArgForConnectionInfo(String info) {
-    List<String> flags = Arrays.asList(info.split(" "));
-
-    MySQLConnectionInfo.Builder builder = MySQLConnectionInfo.builder();
-
-    for (String flag : flags) {
-      Matcher matcherForHost = patternForHost.matcher(flag);
-      Matcher matcherForUser = patternForUser.matcher(flag);
-      Matcher matcherForPass = patternForPass.matcher(flag);
-
-      if (matcherForHost.find()) {
-        // for host name
-        builder.host(matcherForHost.group(1));
-      } else if (matcherForUser.find()) {
-        // for user name
-        builder.host(matcherForUser.group(1));
-      } else if (matcherForPass.find()) {
-        // for password
-        builder.host(matcherForPass.group(1));
-      }
-    }
-
-    return builder.build();
   }
 
   private static String getUsageMessage() {

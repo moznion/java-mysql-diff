@@ -195,8 +195,8 @@ public class AppTest {
       }
 
       String args[] = {
-          "'-uroot -hlocalhost " + tempDBName1 + "'",
-          "'-uroot -hlocalhost " + tempDBName2 + "'"
+          "'-u root -h localhost " + tempDBName1 + "'",
+          "'-u root -h localhost " + tempDBName2 + "'"
       };
       App.main(args);
     } catch (Exception e) {
