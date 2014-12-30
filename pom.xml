@@ -40,6 +40,12 @@
 			<version>1.14.8</version>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>com.google.code.findbugs</groupId>
+			<artifactId>findbugs</artifactId>
+			<version>3.0.0</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<build>

@@ -10,13 +10,13 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import net.moznion.mysql.diff.model.Table;
+
 import org.kohsuke.args4j.Argument;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 import org.kohsuke.args4j.spi.StringArrayOptionHandler;
-
-import net.moznion.mysql.diff.model.Table;
 
 public class App {
   @Option(name = "-v", aliases = "--version", usage = "print version")
@@ -40,7 +40,8 @@ public class App {
     }
 
     if (app.showVersion) {
-      System.out.println(App.class.getPackage().getImplementationVersion());
+      System.out.println(Optional.ofNullable(App.class.getPackage().getImplementationVersion())
+          .orElse("Missing Version")); // XXX "Missing Version" maybe used by testing only...
       return;
     }
 
@@ -49,7 +50,7 @@ public class App {
       return;
     }
 
-    List<String> coreArgs = Arrays.asList(Optional.ofNullable(app.arguments).orElse(new String[0]));
+    List<String> coreArgs = Arrays.asList(Optional.ofNullable(args).orElse(new String[0]));
     int numOfArgs = coreArgs.size();
     if (numOfArgs != 2) {
       if (numOfArgs < 2) {
@@ -92,6 +93,7 @@ public class App {
   private static final Pattern patternForPass = Pattern.compile("^-p(.+)$");
 
   private static String parseArgForDBName(String info) {
+    info = info.substring(1, info.length() - 1); // remove quotes
     List<String> flags = Arrays.asList(info.split(" "));
 
     String dbName = null;
