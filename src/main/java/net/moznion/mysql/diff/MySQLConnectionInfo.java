@@ -36,6 +36,7 @@ public class MySQLConnectionInfo {
     jdbcURL = new StringBuilder()
         .append("jdbc:mysql://")
         .append(builder.host)
+        .append("?allowMultiQueries=true")
         .toString();
   }
 }

@@ -69,12 +69,13 @@ public class SchemaDumper {
         stmt.executeUpdate("CREATE DATABASE " + tempDBName);
       }
 
-      try (Connection dbSpecifiedConnection = DriverManager.getConnection(
-          new StringBuilder().append(mysqlURL).append("/").append(tempDBName).toString(),
-          mysqlUser, mysqlPass)) {
-        try (Statement stmt = dbSpecifiedConnection.createStatement()) {
-          stmt.executeUpdate(sql);
-        }
+      try (Statement stmt = connection.createStatement()) {
+        stmt.execute(new StringBuilder()
+            .append("USE ")
+            .append(tempDBName)
+            .append("; ")
+            .append(sql)
+            .toString());
       }
 
       return fetchSchemaViaMysqldump(tempDBName);
