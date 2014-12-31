@@ -1,10 +1,9 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>net.moznion</groupId>
 	<artifactId>mysql-diff</artifactId>
-	<version>1.0.0-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<packaging>jar</packaging>
 
 	<name>mysql-diff</name>
@@ -214,7 +213,7 @@
 		<url>https://github.com/moznion/java-mysql-diff</url>
 		<connection>scm:git:git@github.com:moznion/java-mysql-diff.git</connection>
 		<developerConnection>scm:git:git@github.com:moznion/java-mysql-diff.git</developerConnection>
-		<tag>HEAD</tag>
+		<tag>mysql-diff-1.0.0</tag>
 	</scm>
 
 	<licenses>
