@@ -18,6 +18,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Class for CLI application.
+ * 
+ * @author moznion
+ *
+ */
 public class App {
   @Option(name = "-v", aliases = "--version", usage = "print version")
   private boolean showVersion;
@@ -28,6 +34,9 @@ public class App {
   @Argument(index = 0, metaVar = "arguments...", handler = StringArrayOptionHandler.class)
   private String[] arguments;
 
+  /**
+   * Class to parse options for remote DB connection information.
+   */
   @Getter
   private class RemoteDbArg {
     @Option(name = "-h", aliases = "--host", metaVar = "host", usage = "specify host")
@@ -43,6 +52,29 @@ public class App {
     private String dbName;
   }
 
+  /**
+   * Entry point of CLI application.
+   * 
+   * <pre>
+   * [Usage]
+   *     java -jar [old_database] [new_database]
+   * [Examples]
+   * Take diff between createtable1.sql and createtable2.sql (both of SQL files on your machine)
+   *     java -jar createtable1.sql createtable2.sql
+   * Take diff between dbname1 and dbname2 (both of databases on the local MySQL)
+   *     java -jar dbname1 dbname2
+   * Take diff between dbname1 and dbname2 (both of databases on remote MySQL)
+   *     java -jar '-uroot -hlocalhost dbname1' '-uroot -hlocalhost dbname2'
+   * [Options]
+   *     -h, --help:    Show usage
+   *     -v, --version: Show version
+   * </pre>
+   * 
+   * @param args Options, or target of database arguments.
+   * @throws IOException Throw if mysqldump command is failed.
+   * @throws SQLException Throw if invalid SQL is given.
+   * @throws InterruptedException Throw if mysqldump command is failed.
+   */
   public static void main(String[] args) throws IOException, SQLException, InterruptedException {
     App app = new App();
 
@@ -130,10 +162,10 @@ public class App {
 
   private static String getUsageMessage() {
     return "[Usage]\n"
-        + "    java -jar <old_database> <new_database>\n"
+        + "    java -jar [old_database] [new_database]\n"
         + "[Examples]\n"
         + "* Take diff between createtable1.sql and createtable2.sql "
-        + "(both of them are SQL file which are on your machine)\n"
+        + "(both of SQL files on your machine)\n"
         + "    java -jar createtable1.sql createtable2.sql\n"
         + "* Take diff between dbname1 and dbname2 "
         + "(both of databases on the local MySQL)\n"

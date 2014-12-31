@@ -14,7 +14,20 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * Diff extractor for table definition of schema.
+ * 
+ * @author moznion
+ *
+ */
 public class DiffExtractor {
+  /**
+   * Extract diff between two schemas.
+   * 
+   * @param oldTables tables of old schema.
+   * @param newTables tables of new schema.
+   * @return Diff string.
+   */
   public static String extractDiff(List<Table> oldTables, List<Table> newTables) {
     StringBuilder diffStringBuilder = new StringBuilder();
 

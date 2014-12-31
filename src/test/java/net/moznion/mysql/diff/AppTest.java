@@ -67,10 +67,10 @@ public class AppTest {
     String usageString = baos.toString();
 
     String expectedUsageString = "[Usage]\n"
-        + "    java -jar <old_database> <new_database>\n"
+        + "    java -jar [old_database] [new_database]\n"
         + "[Examples]\n"
         + "* Take diff between createtable1.sql and createtable2.sql "
-        + "(both of them are SQL file which are on your machine)\n"
+        + "(both of SQL files on your machine)\n"
         + "    java -jar createtable1.sql createtable2.sql\n"
         + "* Take diff between dbname1 and dbname2 "
         + "(both of databases on the local MySQL)\n"

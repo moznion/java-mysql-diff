@@ -2,9 +2,9 @@ package net.moznion.mysql.diff;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Parser for SQL table definition.
+ * Dumper for SQL table definition.
  * 
  * @author moznion
  *
@@ -30,6 +30,13 @@ public class SchemaDumper {
   private final MySqlConnectionInfo localMySqlConnectionInfo;
   private final String mysqldumpPath;
 
+  /**
+   * Instantiate SchemaDumper.
+   * 
+   * @param localMySqlConnectionInfo Connection information of MySQL which is on your local
+   *        environment.
+   * @param mysqldumpPath Path for mysqldump command.
+   */
   public SchemaDumper(MySqlConnectionInfo localMySqlConnectionInfo, String mysqldumpPath) {
     if (localMySqlConnectionInfo == null) {
       throw new IllegalArgumentException("mysqlConnectionInfo must not be null");
@@ -43,18 +50,54 @@ public class SchemaDumper {
     this.mysqldumpPath = mysqldumpPath;
   }
 
+  /**
+   * Instantiate SchemaDumper.
+   * 
+   * <p>
+   * Path of mysqldump will be used default as "mysqldump".
+   * </p>
+   * 
+   * @param localMySqlConnectionInfo Connection information of MySQL which is on your local
+   *        environment.
+   */
   public SchemaDumper(MySqlConnectionInfo localMySqlConnectionInfo) {
     this(localMySqlConnectionInfo, "mysqldump");
   }
 
+  /**
+   * Instantiate SchemaDumper.
+   * 
+   * <p>
+   * Connection information of local MySQL will be used default as "-h localhost -u root".
+   * </p>
+   * 
+   * @param mysqldumpPath Path for mysqldump command.
+   */
   public SchemaDumper(String mysqldumpPath) {
     this(MySqlConnectionInfo.builder().build(), mysqldumpPath);
   }
 
+  /**
+   * Instantiate SchemaDumper.
+   * 
+   * <p>
+   * Path of mysqldump will be used default as "mysqldump".<br>
+   * Connection information of local MySQL will be used default as "-h localhost -u root".
+   * </p>
+   */
   public SchemaDumper() {
     this(MySqlConnectionInfo.builder().build());
   }
 
+  /**
+   * Dump schema from SQL string.
+   * 
+   * @param sql SQL string which is a target to dump.
+   * @return Result of dumping.
+   * @throws SQLException Throw if invalid SQL is given.
+   * @throws IOException Throw if mysqldump command is failed.
+   * @throws InterruptedException Throw if mysqldump command is failed.
+   */
   public String dump(String sql) throws SQLException, IOException, InterruptedException {
     String tempDbName = new StringBuilder()
         .append("tmp_")
@@ -90,6 +133,16 @@ public class SchemaDumper {
     }
   }
 
+  /**
+   * Dump schema from SQL file.
+   * 
+   * @param sqlFile SQL file.
+   * @param charset Character set of SQL file.
+   * @return Result of dumping.
+   * @throws SQLException Throw if invalid SQL is given.
+   * @throws IOException Throw if mysqldump command is failed.
+   * @throws InterruptedException Throw if mysqldump command is failed.
+   */
   public String dump(File sqlFile, Charset charset)
       throws IOException, SQLException, InterruptedException {
     String sqlString =
@@ -97,15 +150,43 @@ public class SchemaDumper {
     return dump(sqlString);
   }
 
+  /**
+   * Dump schema from SQL file which is written by UTF-8.
+   * 
+   * @param sqlFile SQL file (written by UTF-8).
+   * @return Result of dumping.
+   * @throws SQLException Throw if invalid SQL is given.
+   * @throws IOException Throw if mysqldump command is failed.
+   * @throws InterruptedException Throw if mysqldump command is failed.
+   */
   public String dump(File sqlFile) throws IOException, SQLException, InterruptedException {
     return dump(sqlFile, StandardCharsets.UTF_8);
   }
 
+  /**
+   * Dump schema from DB name which is in local MySQL.
+   * 
+   * @param dbName DB name which is in local MySQL.
+   * @return Result of dumping.
+   * @throws SQLException Throw if invalid SQL is given.
+   * @throws IOException Throw if mysqldump command is failed.
+   * @throws InterruptedException Throw if mysqldump command is failed.
+   */
   public String dumpFromLocalDb(String dbName)
       throws IOException, InterruptedException, SQLException {
     return fetchSchemaViaMysqldump(dbName);
   }
 
+  /**
+   * Dump schema from DB name which is in remote MySQL.
+   * 
+   * @param dbName DB name which is in remote MySQL.
+   * @param mysqlConnectionInfo Connection information of remote MySQL.
+   * @return Result of dumping.
+   * @throws SQLException Throw if invalid SQL is given.
+   * @throws IOException Throw if mysqldump command is failed.
+   * @throws InterruptedException Throw if mysqldump command is failed.
+   */
   public String dumpFromRemoteDb(String dbName, MySqlConnectionInfo mysqlConnectionInfo)
       throws IOException, InterruptedException, SQLException {
     String schema = fetchSchemaViaMysqldump(dbName, mysqlConnectionInfo);
