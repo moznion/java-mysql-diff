@@ -6,8 +6,38 @@ Detect and extract diff for schema of MySQL
 Synopsis
 --
 
+### Use as CLI application
+
+Executable fat-jar is available at [here](https://github.com/moznion/java-mysql-diff/releases).
+
+```
+$ java -jar [old_database] [new_database]
+```
+
+If you want more details, please run this command with `--help` option.
+
+### Programmatically
+
 ```java
-TBD
+import net.moznion.mysql.diff.DiffExtractor;
+import net.moznion.mysql.diff.MySqlConnectionInfo;
+import net.moznion.mysql.diff.SchemaDumper;
+import net.moznion.mysql.diff.SchemaParser;
+
+MySqlConnectionInfo mySqlConnectionInfo = MySqlConnectionInfo.builder()
+    .host("localhost") // "localhost" is the default value
+    .user("root")      // "root" is the default value
+    .pass("")          // "" is the default value
+    .build();
+SchemaDumper schemaDumper = new SchemaDumper(mySqlConnectionInfo);
+
+String oldSchema = schemaDumper.dump(oldSql);
+String newSchema = schemaDumper.dump(newSql);
+
+List<Table> oldTables = SchemaParser.parse(oldSchema);
+List<Table> newTables = SchemaParser.parse(newSchema);
+
+String diff = DiffExtractor.extractDiff(oldTables, newTables);
 ```
 
 Description
