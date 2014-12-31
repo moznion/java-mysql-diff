@@ -11,21 +11,21 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class SchemaParser {
-  private final static Pattern TABLA_BLOCK_PATTERN = Pattern.compile(
+  private static final Pattern TABLA_BLOCK_PATTERN = Pattern.compile(
       "CREATE TABLE .*? ENGINE[^;]*", Pattern.MULTILINE | Pattern.DOTALL);
 
-  private final static Pattern TABLE_NAME_PATTERN = Pattern.compile("`(.*?)`");
+  private static final Pattern TABLE_NAME_PATTERN = Pattern.compile("`(.*?)`");
 
-  private final static Pattern PRIMARY_KEY_PATTERN = Pattern.compile(
+  private static final Pattern PRIMARY_KEY_PATTERN = Pattern.compile(
       "^\\s*PRIMARY KEY\\s+\\((.*)\\)");
 
-  private final static Pattern UNIQUE_KEY_PATTERN = Pattern.compile(
+  private static final Pattern UNIQUE_KEY_PATTERN = Pattern.compile(
       "^\\s*UNIQUE KEY\\s+`(.*)`\\s+\\((.*)\\)");
 
-  private final static Pattern ORDINARY_KEY_PATTERN = Pattern.compile(
+  private static final Pattern ORDINARY_KEY_PATTERN = Pattern.compile(
       "^\\s*KEY\\s+`(.*)`\\s+\\((.*)\\)");
 
-  private final static Pattern COLUMN_PATTERN = Pattern.compile(
+  private static final Pattern COLUMN_PATTERN = Pattern.compile(
       "^\\s*`(.*?)`\\s+(.+?)[\n,]?$");
 
   public static List<Table> parse(String schema) {

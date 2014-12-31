@@ -3,6 +3,12 @@ package net.moznion.mysql.diff;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 
+import com.mysql.jdbc.exceptions.jdbc4.CommunicationsException;
+
+import org.junit.Test;
+import org.junit.experimental.runners.Enclosed;
+import org.junit.runner.RunWith;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -15,22 +21,17 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.UUID;
 
-import org.junit.Test;
-import org.junit.experimental.runners.Enclosed;
-import org.junit.runner.RunWith;
-
-import com.mysql.jdbc.exceptions.jdbc4.CommunicationsException;
-
 @RunWith(Enclosed.class)
 public class SchemaDumperTest {
-  private static final String SQL_FOR_TEST = "CREATE TABLE `sample` (\n" +
-      "  `id` int(10) NOT NULL AUTO_INCREMENT,\n" +
-      "  PRIMARY KEY (`id`)\n" +
-      ") ENGINE=InnoDB DEFAULT CHARSET=utf8;\n";
+  private static final String SQL_FOR_TEST = "CREATE TABLE `sample` (\n"
+      + "  `id` int(10) NOT NULL AUTO_INCREMENT,\n"
+      + "  PRIMARY KEY (`id`)\n"
+      + ") ENGINE=InnoDB DEFAULT CHARSET=utf8;\n";
 
   public static class ForConstructors {
     @Test
-    public void shouldInstantiateAsDefault() throws SQLException, IOException, InterruptedException {
+    public void shouldInstantiateAsDefault()
+        throws SQLException, IOException, InterruptedException {
       SchemaDumper schemaDumper = new SchemaDumper();
       try {
         schemaDumper.dump(SQL_FOR_TEST);
@@ -57,9 +58,9 @@ public class SchemaDumperTest {
     }
 
     @Test
-    public void shouldInstantiateByLocalMySQLConnectionInfo() throws SQLException, IOException,
+    public void shouldInstantiateByLocalMySqlConnectionInfo() throws SQLException, IOException,
         InterruptedException {
-      SchemaDumper schemaDumper = new SchemaDumper(MySQLConnectionInfo.builder().build());
+      SchemaDumper schemaDumper = new SchemaDumper(MySqlConnectionInfo.builder().build());
       try {
         schemaDumper.dump(SQL_FOR_TEST);
         assertTrue(true);
@@ -71,9 +72,10 @@ public class SchemaDumperTest {
     }
 
     @Test
-    public void shouldInstantiateByAllArgs() throws SQLException, IOException, InterruptedException {
+    public void shouldInstantiateByAllArgs()
+        throws SQLException, IOException, InterruptedException {
       SchemaDumper schemaDumper =
-          new SchemaDumper(MySQLConnectionInfo.builder().build(), "mysqldump");
+          new SchemaDumper(MySqlConnectionInfo.builder().build(), "mysqldump");
       try {
         schemaDumper.dump(SQL_FOR_TEST);
         assertTrue(true);
@@ -85,7 +87,7 @@ public class SchemaDumperTest {
     }
 
     @Test
-    public void shouldRaiseIAExceptionByNullConnectionInfo() {
+    public void shouldRaiseIllegalArgumentExceptionByNullConnectionInfo() {
       try {
         new SchemaDumper(null, "mysqldump");
       } catch (IllegalArgumentException e) {
@@ -98,9 +100,9 @@ public class SchemaDumperTest {
     }
 
     @Test
-    public void shouldRaiseIAExceptionByNullMysqldumpPath() {
+    public void shouldRaiseIllegalArgumentExceptionByNullMysqldumpPath() {
       try {
-        new SchemaDumper(MySQLConnectionInfo.builder().build(), null);
+        new SchemaDumper(MySqlConnectionInfo.builder().build(), null);
       } catch (IllegalArgumentException e) {
         assertTrue(true);
         return;
@@ -115,7 +117,7 @@ public class SchemaDumperTest {
     private SchemaDumper schemaDumper = new SchemaDumper();
 
     @Test
-    public void shouldDumpBySQLString() throws SQLException, IOException, InterruptedException {
+    public void shouldDumpBySqlString() throws SQLException, IOException, InterruptedException {
       try {
         schemaDumper.dump(SQL_FOR_TEST);
         assertTrue(true);
@@ -127,12 +129,13 @@ public class SchemaDumperTest {
     }
 
     @Test
-    public void shouldDumpBySQLFileWithDefaultCharset()
+    public void shouldDumpBySqlFileWithDefaultCharset()
         throws IOException, SQLException, InterruptedException {
       File sqlFile = File.createTempFile("tempsql", ".sql");
 
-      try (BufferedWriter bufferedWriter = new BufferedWriter
-          (new OutputStreamWriter(new FileOutputStream(sqlFile), Charset.forName("UTF-8")))) {
+      try (BufferedWriter bufferedWriter =
+          new BufferedWriter(new OutputStreamWriter(new FileOutputStream(sqlFile),
+              Charset.forName("UTF-8")))) {
         bufferedWriter.write(SQL_FOR_TEST);
       }
 
@@ -149,12 +152,13 @@ public class SchemaDumperTest {
     }
 
     @Test
-    public void shouldDumpBySQLFileWithSpecifiedCharset()
+    public void shouldDumpBySqlFileWithSpecifiedCharset()
         throws IOException, SQLException, InterruptedException {
       File sqlFile = File.createTempFile("tempsql", ".sql");
 
-      try (BufferedWriter bufferedWriter = new BufferedWriter
-          (new OutputStreamWriter(new FileOutputStream(sqlFile), Charset.forName("EUC-JP")))) {
+      try (BufferedWriter bufferedWriter =
+          new BufferedWriter(new OutputStreamWriter(new FileOutputStream(sqlFile),
+              Charset.forName("EUC-JP")))) {
         bufferedWriter.write(SQL_FOR_TEST);
       }
 
@@ -172,33 +176,33 @@ public class SchemaDumperTest {
     }
 
     @Test
-    public void shouldDumpFromLocalMySQL() throws SQLException, IOException, InterruptedException
-    {
-      MySQLConnectionInfo connInfo = MySQLConnectionInfo.builder().build();
+    public void shouldDumpFromLocalMySql()
+        throws SQLException, IOException, InterruptedException {
+      MySqlConnectionInfo connInfo = MySqlConnectionInfo.builder().build();
 
-      String tempDBName = new StringBuilder()
+      String tempDbName = new StringBuilder()
           .append("tmp_")
           .append(UUID.randomUUID().toString().replaceAll("-", ""))
           .toString();
-      String mysqlURL = connInfo.getJdbcURL();
+      String mysqlUrl = connInfo.getJdbcUrl();
       String user = connInfo.getUser();
       String pass = connInfo.getPass();
 
-      try (Connection connection = DriverManager.getConnection(mysqlURL, user, pass)) {
+      try (Connection connection = DriverManager.getConnection(mysqlUrl, user, pass)) {
         try (Statement stmt = connection.createStatement()) {
-          stmt.executeUpdate("CREATE DATABASE " + tempDBName);
+          stmt.executeUpdate("CREATE DATABASE " + tempDbName);
         }
         try (Statement stmt = connection.createStatement()) {
-          stmt.executeUpdate("USE " + tempDBName + "; " + SQL_FOR_TEST);
+          stmt.executeUpdate("USE " + tempDbName + "; " + SQL_FOR_TEST);
         }
 
-        schemaDumper.dumpFromLocalDB(tempDBName);
+        schemaDumper.dumpFromLocalDb(tempDbName);
       } catch (Exception e) {
         throw e;
       } finally {
-        try (Connection connectionToTeardown = DriverManager.getConnection(mysqlURL, user, pass)) {
+        try (Connection connectionToTeardown = DriverManager.getConnection(mysqlUrl, user, pass)) {
           try (Statement stmt = connectionToTeardown.createStatement()) {
-            stmt.executeUpdate("DROP DATABASE " + tempDBName);
+            stmt.executeUpdate("DROP DATABASE " + tempDbName);
           }
         } catch (CommunicationsException e) {
           assumeTrue("MySQL maybe not launched", false);
@@ -208,31 +212,31 @@ public class SchemaDumperTest {
     }
 
     @Test
-    public void shouldDumpFromRemoteMySQL() throws SQLException, IOException, InterruptedException {
-      MySQLConnectionInfo connInfo = MySQLConnectionInfo.builder().build();
+    public void shouldDumpFromRemoteMySql() throws SQLException, IOException, InterruptedException {
+      MySqlConnectionInfo connInfo = MySqlConnectionInfo.builder().build();
 
-      String tempDBName = new StringBuilder()
+      String tempDbName = new StringBuilder()
           .append("tmp_")
           .append(UUID.randomUUID().toString().replaceAll("-", ""))
           .toString();
-      String mysqlURL = connInfo.getJdbcURL();
+      String mysqlUrl = connInfo.getJdbcUrl();
       String user = connInfo.getUser();
       String pass = connInfo.getPass();
 
-      try (Connection connection = DriverManager.getConnection(mysqlURL, user, pass)) {
+      try (Connection connection = DriverManager.getConnection(mysqlUrl, user, pass)) {
         try (Statement stmt = connection.createStatement()) {
-          stmt.executeUpdate("CREATE DATABASE " + tempDBName);
+          stmt.executeUpdate("CREATE DATABASE " + tempDbName);
         }
         try (Statement stmt = connection.createStatement()) {
-          stmt.executeUpdate("USE " + tempDBName + "; " + SQL_FOR_TEST);
+          stmt.executeUpdate("USE " + tempDbName + "; " + SQL_FOR_TEST);
         }
-        schemaDumper.dumpFromRemoteDB(tempDBName, connInfo);
+        schemaDumper.dumpFromRemoteDb(tempDbName, connInfo);
       } catch (Exception e) {
         throw e;
       } finally {
-        try (Connection connectionToTeardown = DriverManager.getConnection(mysqlURL, user, pass)) {
+        try (Connection connectionToTeardown = DriverManager.getConnection(mysqlUrl, user, pass)) {
           try (Statement stmt = connectionToTeardown.createStatement()) {
-            stmt.executeUpdate("DROP DATABASE " + tempDBName);
+            stmt.executeUpdate("DROP DATABASE " + tempDbName);
           }
         } catch (CommunicationsException e) {
           assumeTrue("MySQL maybe not launched", false);

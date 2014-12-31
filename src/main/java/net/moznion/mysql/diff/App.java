@@ -1,14 +1,7 @@
 package net.moznion.mysql.diff;
 
-import java.io.File;
-import java.io.IOException;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-
 import lombok.Getter;
+
 import net.moznion.mysql.diff.model.Table;
 
 import org.kohsuke.args4j.Argument;
@@ -16,6 +9,14 @@ import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 import org.kohsuke.args4j.spi.StringArrayOptionHandler;
+
+import java.io.File;
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 
 public class App {
   @Option(name = "-v", aliases = "--version", usage = "print version")
@@ -28,7 +29,7 @@ public class App {
   private String[] arguments;
 
   @Getter
-  private class RemoteDBArg {
+  private class RemoteDbArg {
     @Option(name = "-h", aliases = "--host", metaVar = "host", usage = "specify host")
     private String host;
 
@@ -49,8 +50,7 @@ public class App {
     try {
       parser.parseArgument(args);
     } catch (CmdLineException e) {
-      e.printStackTrace();
-      return;
+      throw new IllegalArgumentException("Invalid arguments are detected: " + Arrays.asList(args));
     }
 
     if (app.showVersion) {
@@ -88,37 +88,37 @@ public class App {
         schema = schemaDumper.dump(file);
       } else if (arg.contains(" ")) {
         // for remote server
-        RemoteDBArg remoteDBArg = new App().new RemoteDBArg();
-        CmdLineParser remoteDBArgParser = new CmdLineParser(remoteDBArg);
+        RemoteDbArg remoteDbArg = new App().new RemoteDbArg();
+        CmdLineParser remoteDbArgParser = new CmdLineParser(remoteDbArg);
         try {
-          remoteDBArgParser.parseArgument(arg.substring(1, arg.length() - 1).split(" "));
+          remoteDbArgParser.parseArgument(arg.substring(1, arg.length() - 1).split(" "));
         } catch (CmdLineException e) {
           throw new IllegalArgumentException("Invalid remote DB argument is detected: " + arg);
         }
 
-        if (remoteDBArg.dbName == null || remoteDBArg.dbName.isEmpty()) {
+        if (remoteDbArg.dbName == null || remoteDbArg.dbName.isEmpty()) {
           throw new IllegalArgumentException("Invalid remote DB argument is detected: " + arg);
         }
 
-        MySQLConnectionInfo.Builder mysqlConnectionInfoBuilder = MySQLConnectionInfo.builder();
+        MySqlConnectionInfo.Builder mysqlConnectionInfoBuilder = MySqlConnectionInfo.builder();
 
-        if (remoteDBArg.host != null) {
-          mysqlConnectionInfoBuilder.host(remoteDBArg.host);
+        if (remoteDbArg.host != null) {
+          mysqlConnectionInfoBuilder.host(remoteDbArg.host);
         }
 
-        if (remoteDBArg.user != null) {
-          mysqlConnectionInfoBuilder.user(remoteDBArg.user);
+        if (remoteDbArg.user != null) {
+          mysqlConnectionInfoBuilder.user(remoteDbArg.user);
         }
 
-        if (remoteDBArg.pass != null) {
-          mysqlConnectionInfoBuilder.pass(remoteDBArg.pass);
+        if (remoteDbArg.pass != null) {
+          mysqlConnectionInfoBuilder.pass(remoteDbArg.pass);
         }
 
         schema =
-            schemaDumper.dumpFromRemoteDB(remoteDBArg.dbName, mysqlConnectionInfoBuilder.build());
+            schemaDumper.dumpFromRemoteDb(remoteDbArg.dbName, mysqlConnectionInfoBuilder.build());
       } else {
         // for local server
-        schema = schemaDumper.dumpFromLocalDB(arg);
+        schema = schemaDumper.dumpFromLocalDb(arg);
       }
 
       parsed.add(SchemaParser.parse(schema));
@@ -129,21 +129,21 @@ public class App {
   }
 
   private static String getUsageMessage() {
-    return "[Usage]\n" +
-        "    java -jar <old_database> <new_database>\n" +
-        "[Examples]\n" +
-        "* Take diff between createtable1.sql and createtable2.sql " +
-        "(both of them are SQL file which are on your machine)\n" +
-        "    java -jar createtable1.sql createtable2.sql\n" +
-        "* Take diff between dbname1 and dbname2 " +
-        "(both of databases on the local MySQL)\n" +
-        "    java -jar dbname1 dbname2\n" +
-        "* Take diff between dbname1 and dbname2 " +
-        "(both of databases on remote MySQL)\n" +
-        "    java -jar '-u root -h localhost dbname1' '-u root -h localhost dbname2'" +
-        "\n" +
-        "[Options]\n" +
-        "    -h, --help:    Show usage\n" +
-        "    -v, --version: Show version";
+    return "[Usage]\n"
+        + "    java -jar <old_database> <new_database>\n"
+        + "[Examples]\n"
+        + "* Take diff between createtable1.sql and createtable2.sql "
+        + "(both of them are SQL file which are on your machine)\n"
+        + "    java -jar createtable1.sql createtable2.sql\n"
+        + "* Take diff between dbname1 and dbname2 "
+        + "(both of databases on the local MySQL)\n"
+        + "    java -jar dbname1 dbname2\n"
+        + "* Take diff between dbname1 and dbname2 "
+        + "(both of databases on remote MySQL)\n"
+        + "    java -jar '-u root -h localhost dbname1' '-u root -h localhost dbname2'"
+        + "\n"
+        + "[Options]\n"
+        + "    -h, --help:    Show usage\n"
+        + "    -v, --version: Show version";
   }
 }

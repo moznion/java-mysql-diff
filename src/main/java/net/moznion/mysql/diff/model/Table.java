@@ -1,12 +1,12 @@
 package net.moznion.mysql.diff.model;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 @Getter
 public class Table {

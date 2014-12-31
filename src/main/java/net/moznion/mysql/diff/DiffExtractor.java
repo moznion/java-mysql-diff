@@ -1,5 +1,10 @@
 package net.moznion.mysql.diff;
 
+import net.moznion.mysql.diff.model.Column;
+import net.moznion.mysql.diff.model.OrdinaryKey;
+import net.moznion.mysql.diff.model.Table;
+import net.moznion.mysql.diff.model.UniqueKey;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -8,11 +13,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import net.moznion.mysql.diff.model.Column;
-import net.moznion.mysql.diff.model.OrdinaryKey;
-import net.moznion.mysql.diff.model.Table;
-import net.moznion.mysql.diff.model.UniqueKey;
 
 public class DiffExtractor {
   public static String extractDiff(List<Table> oldTables, List<Table> newTables) {

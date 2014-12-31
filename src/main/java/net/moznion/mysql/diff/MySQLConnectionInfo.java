@@ -5,11 +5,11 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 
 @Getter
-public class MySQLConnectionInfo {
+public class MySqlConnectionInfo {
   private final String host;
   private final String user;
   private final String pass;
-  private final String jdbcURL;
+  private final String jdbcUrl;
 
   @Setter
   @Accessors(fluent = true)
@@ -20,8 +20,8 @@ public class MySQLConnectionInfo {
 
     public Builder() {}
 
-    public MySQLConnectionInfo build() {
-      return new MySQLConnectionInfo(this);
+    public MySqlConnectionInfo build() {
+      return new MySqlConnectionInfo(this);
     }
   }
 
@@ -29,11 +29,11 @@ public class MySQLConnectionInfo {
     return new Builder();
   }
 
-  private MySQLConnectionInfo(Builder builder) {
+  private MySqlConnectionInfo(Builder builder) {
     host = builder.host;
     user = builder.user;
     pass = builder.pass;
-    jdbcURL = new StringBuilder()
+    jdbcUrl = new StringBuilder()
         .append("jdbc:mysql://")
         .append(builder.host)
         .append("?allowMultiQueries=true")

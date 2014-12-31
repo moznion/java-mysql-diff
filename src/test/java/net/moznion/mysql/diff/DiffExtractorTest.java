@@ -4,6 +4,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 
+import com.mysql.jdbc.exceptions.jdbc4.CommunicationsException;
+
+import net.moznion.mysql.diff.model.Table;
+
+import org.junit.Test;
+import org.junit.experimental.runners.Enclosed;
+import org.junit.runner.RunWith;
+
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -12,23 +20,15 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import net.moznion.mysql.diff.model.Table;
-
-import org.junit.Test;
-import org.junit.experimental.runners.Enclosed;
-import org.junit.runner.RunWith;
-
-import com.mysql.jdbc.exceptions.jdbc4.CommunicationsException;
-
 @RunWith(Enclosed.class)
 public class DiffExtractorTest {
   private static final SchemaDumper SCHEMA_DUMPER = new SchemaDumper();
 
-  public static class forTableDiff {
-    private String getAlterTableDiffRightly(String oldSQL, String newSQL) throws SQLException,
+  public static class ForTableDiff {
+    private String getAlterTableDiffRightly(String oldSql, String newSql) throws SQLException,
         IOException, InterruptedException {
-      String oldSchema = SCHEMA_DUMPER.dump(oldSQL);
-      String newSchema = SCHEMA_DUMPER.dump(newSQL);
+      String oldSchema = SCHEMA_DUMPER.dump(oldSql);
+      String newSchema = SCHEMA_DUMPER.dump(newSql);
 
       List<Table> oldTables = SchemaParser.parse(oldSchema);
       List<Table> newTables = SchemaParser.parse(newSchema);
@@ -47,21 +47,21 @@ public class DiffExtractorTest {
     @Test
     public void shouldDetectColumnDiffRightly() throws SQLException, IOException,
         InterruptedException {
-      String oldSQL = "CREATE TABLE `sample` (" +
-          "  `id` int(10) NOT NULL AUTO_INCREMENT," +
-          "  `title` varchar(64) NOT NULL," +
-          "  `created_on` int(10) unsigned NOT NULL," +
-          "  PRIMARY KEY (`id`)" +
-          ") ENGINE=InnoDB DEFAULT CHARSET=utf8;";
-      String newSQL = "CREATE TABLE `sample` (" +
-          "  `id` int(10) NOT NULL AUTO_INCREMENT," +
-          "  `title` varchar(64) DEFAULT NULL," +
-          "  `updated_on` int(10) unsigned NOT NULL," +
-          "  PRIMARY KEY (`id`)" +
-          ") ENGINE=InnoDB DEFAULT CHARSET=utf8;";
+      String oldSql = "CREATE TABLE `sample` ("
+          + "  `id` int(10) NOT NULL AUTO_INCREMENT,"
+          + "  `title` varchar(64) NOT NULL,"
+          + "  `created_on` int(10) unsigned NOT NULL,"
+          + "  PRIMARY KEY (`id`)"
+          + ") ENGINE=InnoDB DEFAULT CHARSET=utf8;";
+      String newSql = "CREATE TABLE `sample` ("
+          + "  `id` int(10) NOT NULL AUTO_INCREMENT,"
+          + "  `title` varchar(64) DEFAULT NULL,"
+          + "  `updated_on` int(10) unsigned NOT NULL,"
+          + "  PRIMARY KEY (`id`)"
+          + ") ENGINE=InnoDB DEFAULT CHARSET=utf8;";
 
       try {
-        String diff = getAlterTableDiffRightly(oldSQL, newSQL);
+        String diff = getAlterTableDiffRightly(oldSql, newSql);
         Set<String> modifiers = Arrays.stream(diff.split(", ")).collect(Collectors.toSet());
         Set<String> expected = Stream.of(
             "DROP `created_on`",
@@ -77,32 +77,33 @@ public class DiffExtractorTest {
     }
 
     @Test
-    public void shouldDetectKeyDiffRightly() throws SQLException, IOException, InterruptedException {
-      String oldSQL = "CREATE TABLE `sample` (" +
-          "  `id` int(10) NOT NULL AUTO_INCREMENT," +
-          "  `name` varchar(16) NOT NULL," +
-          "  `email` varchar(16) NOT NULL," +
-          "  `title` varchar(64) NOT NULL," +
-          "  `created_on` int (10) unsigned NOT NULL," +
-          "  `updated_on` int (10) unsigned NOT NULL," +
-          "  PRIMARY KEY (`id`)," +
-          "  UNIQUE KEY `name` (`name`)," +
-          "  KEY `updated_on` (`updated_on`)" +
-          ") ENGINE=InnoDB DEFAULT CHARSET=utf8;";
-      String newSQL = "CREATE TABLE `sample` (" +
-          "  `id` int(10) NOT NULL AUTO_INCREMENT," +
-          "  `name` varchar(16) NOT NULL," +
-          "  `email` varchar(16) NOT NULL," +
-          "  `title` varchar(64) NOT NULL," +
-          "  `created_on` int (10) unsigned NOT NULL," +
-          "  `updated_on` int (10) unsigned NOT NULL," +
-          "  PRIMARY KEY (`id`)," +
-          "  UNIQUE KEY `identifier` (`email`,`name`)," +
-          "  KEY `timestamp` (`created_on`,`updated_on`)" +
-          ") ENGINE=InnoDB DEFAULT CHARSET=utf8;";
+    public void shouldDetectKeyDiffRightly()
+        throws SQLException, IOException, InterruptedException {
+      String oldSql = "CREATE TABLE `sample` ("
+          + "  `id` int(10) NOT NULL AUTO_INCREMENT,"
+          + "  `name` varchar(16) NOT NULL,"
+          + "  `email` varchar(16) NOT NULL,"
+          + "  `title` varchar(64) NOT NULL,"
+          + "  `created_on` int (10) unsigned NOT NULL,"
+          + "  `updated_on` int (10) unsigned NOT NULL,"
+          + "  PRIMARY KEY (`id`),"
+          + "  UNIQUE KEY `name` (`name`),"
+          + "  KEY `updated_on` (`updated_on`)"
+          + ") ENGINE=InnoDB DEFAULT CHARSET=utf8;";
+      String newSql = "CREATE TABLE `sample` ("
+          + "  `id` int(10) NOT NULL AUTO_INCREMENT,"
+          + "  `name` varchar(16) NOT NULL,"
+          + "  `email` varchar(16) NOT NULL,"
+          + "  `title` varchar(64) NOT NULL,"
+          + "  `created_on` int (10) unsigned NOT NULL,"
+          + "  `updated_on` int (10) unsigned NOT NULL,"
+          + "  PRIMARY KEY (`id`),"
+          + "  UNIQUE KEY `identifier` (`email`,`name`),"
+          + "  KEY `timestamp` (`created_on`,`updated_on`)"
+          + ") ENGINE=InnoDB DEFAULT CHARSET=utf8;";
 
       try {
-        String diff = getAlterTableDiffRightly(oldSQL, newSQL);
+        String diff = getAlterTableDiffRightly(oldSql, newSql);
         Set<String> modifiers = Arrays.stream(diff.split(", ")).collect(Collectors.toSet());
         Set<String> expected = Stream.of(
             "ADD INDEX `created_on_updated_on` (`created_on`,`updated_on`)",
@@ -119,22 +120,22 @@ public class DiffExtractorTest {
     }
   }
 
-  public static class forMissingTable {
+  public static class ForMissingTable {
     @Test
     public void shouldDetectMissingTableRightly() throws SQLException, IOException,
         InterruptedException {
-      String oldSQL = "CREATE TABLE `sample` (" +
-          "  `id` int(10) NOT NULL AUTO_INCREMENT," +
-          "  PRIMARY KEY (`id`)" +
-          ") ENGINE=InnoDB DEFAULT CHARSET=utf8;";
-      String newSQL = "CREATE TABLE `new_one` (" +
-          "  `id` int(10) NOT NULL AUTO_INCREMENT," +
-          "  PRIMARY KEY (`id`)" +
-          ") ENGINE=InnoDB DEFAULT CHARSET=utf8;";
+      String oldSql = "CREATE TABLE `sample` ("
+          + "  `id` int(10) NOT NULL AUTO_INCREMENT,"
+          + "  PRIMARY KEY (`id`)"
+          + ") ENGINE=InnoDB DEFAULT CHARSET=utf8;";
+      String newSql = "CREATE TABLE `new_one` ("
+          + "  `id` int(10) NOT NULL AUTO_INCREMENT,"
+          + "  PRIMARY KEY (`id`)"
+          + ") ENGINE=InnoDB DEFAULT CHARSET=utf8;";
 
       try {
-        String oldSchema = SCHEMA_DUMPER.dump(oldSQL);
-        String newSchema = SCHEMA_DUMPER.dump(newSQL);
+        String oldSchema = SCHEMA_DUMPER.dump(oldSql);
+        String newSchema = SCHEMA_DUMPER.dump(newSql);
 
         List<Table> oldTables = SchemaParser.parse(oldSchema);
         List<Table> newTables = SchemaParser.parse(newSchema);
