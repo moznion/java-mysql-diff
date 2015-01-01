@@ -1,7 +1,7 @@
 mysql-diff [![Build Status](https://travis-ci.org/moznion/java-mysql-diff.svg?branch=master)](https://travis-ci.org/moznion/java-mysql-diff)
 ==
 
-Detect and extract diff for schema of MySQL
+Detect and extract diff between two table declarations from schema of MySQL.
 
 Synopsis
 --
@@ -43,7 +43,22 @@ String diff = DiffExtractor.extractDiff(oldTables, newTables);
 Description
 --
 
+This package provides a function to detect and extract diff between two table declarations from schema.
+
+Extraction processing flow is following;
+
+1. Dump normalized schema by creating new database according to input and dump it out by using `mysqldump`
+2. Parse normalized schema
+3. Take diff between parsed structure
+
 This package is port of onishi-san's [mysqldiff](https://github.com/onishi/mysqldiff) from Perl to Java.
+
+Dependencies
+--
+
+- Java 8 or later
+- MySQL 5 or later (`mysqld` must be upped when this program is executed)
+- mysqldump
 
 How to build fat-jar
 --

@@ -7,7 +7,7 @@
 	<packaging>jar</packaging>
 
 	<name>mysql-diff</name>
-	<description>Detect and extract diff for schema of MySQL</description>
+	<description>Detect and extract diff between two table declarations from schema of MySQL</description>
 	<url>https://github.com/moznion/java-mysql-diff</url>
 
 	<properties>
