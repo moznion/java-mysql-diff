@@ -24,12 +24,12 @@ import net.moznion.mysql.diff.MySqlConnectionInfo;
 import net.moznion.mysql.diff.SchemaDumper;
 import net.moznion.mysql.diff.SchemaParser;
 
-MySqlConnectionInfo mySqlConnectionInfo = MySqlConnectionInfo.builder()
-    .host("localhost") // "localhost" is the default value
-    .user("root")      // "root" is the default value
-    .pass("")          // "" is the default value
+MySqlConnectionInfo localMySqlConnectionInfo = MySqlConnectionInfo.builder()
+    // .host("your-host")     // "localhost" is the default value
+    // .user("your-name")     // "root" is the default value
+    // .pass("your-password") // "" is the default value
     .build();
-SchemaDumper schemaDumper = new SchemaDumper(mySqlConnectionInfo);
+SchemaDumper schemaDumper = new SchemaDumper(localMySqlConnectionInfo);
 
 String oldSchema = schemaDumper.dump(oldSql);
 String newSchema = schemaDumper.dump(newSql);
