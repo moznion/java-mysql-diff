@@ -1,4 +1,4 @@
-mysql-diff [![Build Status](https://travis-ci.org/moznion/java-mysql-diff.svg?branch=master)](https://travis-ci.org/moznion/java-mysql-diff)
+mysql-diff [![Build Status](https://travis-ci.org/moznion/java-mysql-diff.svg?branch=master)](https://travis-ci.org/moznion/java-mysql-diff) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/net.moznion/mysql-diff/badge.svg)](https://maven-badges.herokuapp.com/maven-central/net.moznion/mysql-diff)
 ==
 
 Detect and extract diff between two table declarations from schema of MySQL.
