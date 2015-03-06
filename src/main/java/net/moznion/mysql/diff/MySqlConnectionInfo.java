@@ -25,6 +25,7 @@ public class MySqlConnectionInfo {
    * </p>
    * <ul>
    * <li>host(String hostName) // default value: "localhost"</li>
+   * <li>port(int portNumber)  // default value: 3306</li>
    * <li>user(String userName) // default value: "root"</li>
    * <li>host(String password) // default value: ""</li>
    * </ul>
@@ -33,6 +34,7 @@ public class MySqlConnectionInfo {
   @Accessors(fluent = true)
   public static class Builder {
     private String host = "localhost";
+    private int port = 3306;
     private String user = "root";
     private String pass = "";
 
@@ -62,6 +64,8 @@ public class MySqlConnectionInfo {
     jdbcUrl = new StringBuilder()
         .append("jdbc:mysql://")
         .append(builder.host)
+        .append(":")
+        .append(builder.port)
         .append("?allowMultiQueries=true")
         .toString();
   }
