@@ -63,7 +63,7 @@ public class MySqlConnectionInfo {
      *        jdbc:mysql://localhost:8888/something_table?cacheServerConfiguration=true)
      */
     public Builder url(String url) {
-      url = url.replaceFirst("^jdbc:mysql://", ""); // remove connection prefix
+      url = url.replaceFirst("^.+://", ""); // remove connection prefix
 
       List<String> splittedByQuestion = Arrays.asList(url.split("\\?"));
       String origin = splittedByQuestion.get(0);
