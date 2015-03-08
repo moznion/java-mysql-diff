@@ -1,4 +1,4 @@
-mysql-diff [![Build Status](https://travis-ci.org/moznion/java-mysql-diff.svg?branch=master)](https://travis-ci.org/moznion/java-mysql-diff) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/net.moznion/mysql-diff/badge.svg)](https://maven-badges.herokuapp.com/maven-central/net.moznion/mysql-diff)
+mysql-diff [![Build Status](https://travis-ci.org/moznion/java-mysql-diff.svg?branch=master)](https://travis-ci.org/moznion/java-mysql-diff) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/net.moznion/mysql-diff/badge.svg)](https://maven-badges.herokuapp.com/maven-central/net.moznion/mysql-diff) [![javadoc.io](https://javadocio-badges.herokuapp.com/net.moznion/mysql-diff/badge.svg)](https://javadocio-badges.herokuapp.com/net.moznion/mysql-diff)
 ==
 
 Detect and extract diff between two table declarations from schema of MySQL.
@@ -28,6 +28,7 @@ MySqlConnectionInfo localMySqlConnectionInfo = MySqlConnectionInfo.builder()
     // .host("your-host")     // "localhost" is the default value
     // .user("your-name")     // "root" is the default value
     // .pass("your-password") // "" is the default value
+    // .url("jdbc:mysql://your-host:3306?cacheServerConfiguration=true") // or you can specify host, port and properties by a URL
     .build();
 SchemaDumper schemaDumper = new SchemaDumper(localMySqlConnectionInfo);
 
