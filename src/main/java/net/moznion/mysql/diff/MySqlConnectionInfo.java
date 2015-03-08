@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -48,7 +49,7 @@ public class MySqlConnectionInfo {
     private List<String> properties = new ArrayList<>(Arrays.asList("allowMultiQueries=true"));
 
     /**
-     * Add property.
+     * Add a property.
      * 
      * @param property
      */
@@ -57,31 +58,27 @@ public class MySqlConnectionInfo {
     }
 
     /**
+     * Add properties.
+     * 
+     * @param properties
+     */
+    public void addProperties(List<String> properties) {
+      this.properties.addAll(properties);
+    }
+
+    /**
      * Set host name, port number and options by URL of a remote MySQL.
      * 
      * @param url URL of a remote MySQL (e.g.
      *        jdbc:mysql://localhost:8888/something_table?cacheServerConfiguration=true)
+     * @throws URISyntaxException
      */
-    public Builder url(String url) {
-      url = url.replaceFirst("^.+://", ""); // remove connection prefix
+    public Builder url(String url) throws URISyntaxException {
+      MySqlConnectionUri connectionUri = new MySqlConnectionUri(url);
 
-      List<String> splittedByQuestion = Arrays.asList(url.split("\\?"));
-      String origin = splittedByQuestion.get(0);
-
-      List<String> splittedOrigin = Arrays.asList(origin.split("/")[0].split(":"));
-      host = splittedOrigin.get(0);
-      if (splittedOrigin.size() >= 2) {
-        // exists port number
-        port = Integer.parseInt(splittedOrigin.get(1), 10);
-      }
-
-      if (splittedByQuestion.size() >= 2) {
-        // for property
-        String serialProperty = splittedByQuestion.get(1);
-        Arrays.asList(serialProperty.split("&")).forEach(property -> {
-          addProperty(property);
-        });
-      }
+      host = connectionUri.getHost();
+      port = connectionUri.getPort();
+      addProperties(connectionUri.getQueries());
 
       return this;
     }
