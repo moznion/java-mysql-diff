@@ -228,9 +228,13 @@ public class SchemaDumper {
     if (process.waitFor() != 0) {
       throw new RuntimeException(
           new StringBuilder()
-              .append("Failed to execute `mysqldump` command (command: ")
+              .append("Failed to execute `mysqldump` command.\n")
+              .append("[command] >>>\n")
               .append(String.join(" ", mysqldumpCommand))
-              .append(")")
+              .append("\n<<<\n")
+              .append("[output] >>>\n")
+              .append(schema)
+              .append("\n<<<\n")
               .toString());
     }
 
