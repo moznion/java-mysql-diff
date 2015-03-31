@@ -3,7 +3,7 @@
 
 	<groupId>net.moznion</groupId>
 	<artifactId>mysql-diff</artifactId>
-	<version>1.0.2</version>
+	<version>1.0.3-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>mysql-diff</name>
@@ -213,7 +213,7 @@
 		<url>https://github.com/moznion/java-mysql-diff</url>
 		<connection>scm:git:git@github.com:moznion/java-mysql-diff.git</connection>
 		<developerConnection>scm:git:git@github.com:moznion/java-mysql-diff.git</developerConnection>
-		<tag>mysql-diff-1.0.2</tag>
+		<tag>HEAD</tag>
 	</scm>
 
 	<licenses>
