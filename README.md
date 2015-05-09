@@ -32,6 +32,16 @@ MySqlConnectionInfo localMySqlConnectionInfo = MySqlConnectionInfo.builder()
     .build();
 SchemaDumper schemaDumper = new SchemaDumper(localMySqlConnectionInfo);
 
+final String oldSql = "CREATE TABLE `sample` (\n"
+    + "  `id` INTEGER(10) NOT NULL AUTO_INCREMENT,\n"
+    + "  PRIMARY KEY (`id`)\n"
+    + ") ENGINE=InnoDB DEFAULT CHARSET=utf8;\n";
+final String newSql = "CREATE TABLE `sample` (\n"
+    + "  `id` INTEGER(10) NOT NULL AUTO_INCREMENT,\n"
+    + "  `name` VARCHAR(32) NOT NULL,\n"
+    + "  PRIMARY KEY (`id`)\n"
+    + ") ENGINE=InnoDB DEFAULT CHARSET=utf8;\n";
+
 String oldSchema = schemaDumper.dump(oldSql);
 String newSchema = schemaDumper.dump(newSql);
 
