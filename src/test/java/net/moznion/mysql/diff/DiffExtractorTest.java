@@ -1,17 +1,6 @@
 package net.moznion.mysql.diff;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeTrue;
-
-import com.mysql.jdbc.exceptions.jdbc4.CommunicationsException;
-
-import net.moznion.mysql.diff.model.Table;
-
-import org.junit.Test;
-import org.junit.experimental.runners.Enclosed;
-import org.junit.runner.RunWith;
-
+import com.mysql.cj.jdbc.exceptions.CommunicationsException;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -19,6 +8,14 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import net.moznion.mysql.diff.model.Table;
+import org.junit.Test;
+import org.junit.experimental.runners.Enclosed;
+import org.junit.runner.RunWith;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
 
 @RunWith(Enclosed.class)
 public class DiffExtractorTest {

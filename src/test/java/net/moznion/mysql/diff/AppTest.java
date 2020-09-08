@@ -1,13 +1,6 @@
 package net.moznion.mysql.diff;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeTrue;
-
-import com.mysql.jdbc.exceptions.jdbc4.CommunicationsException;
-
-import org.junit.Test;
-
+import com.mysql.cj.jdbc.exceptions.CommunicationsException;
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -23,6 +16,11 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
 import java.util.UUID;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
 
 public class AppTest {
   private static final String SQL_FOR_TEST = "CREATE TABLE `sample` (\n"
